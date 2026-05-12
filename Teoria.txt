@@ -1,0 +1,4260 @@
+Programación Concurrente y
+Distribuida
+Tema 2. Programas concurrentes
+Infografía Tema 2
+• Consiste en la ejecución simultánea de dos o más
+procesos/hilos
+• Los procesos/hilos colaboran para realizar una tarea global
+Programa concurrente
+Calcular Integral de f(x);
+Calcular Integral de g(x);
+Integrales secuencial
+Integrales concurrente
+Calcular Integral de f(x);
+Proceso 1
+Calcular Integral de g(x);
+Proceso 2
+Programa concurrente
+int contador = 0;
+Fichero f = siguienteFichero();
+while (f!= null) {
+int palabras = contarPalabras(f);
+contador = contador + palabras;
+f = siguienteFichero();
+}
+Contar palabras
+secuencial
+Contar palabras
+concurrente
+Fichero f = siguienteFicheroNoMarcado();
+while (f != null) {
+marcaFichero(f);
+int palabras = contarPalabras(f);
+contador = contador + palabras;
+f = siguienteFicheroNoMarcado();
+}
+Proceso 1
+Fichero f = siguienteFicheroNoMarcado();
+while (f != null) {
+marcaFichero(f);
+int palabras = contarPalabras(f);
+contador = contador + palabras;
+f = siguienteFicheroNoMarcado();
+}
+Proceso 2
+contador = 0;
+Memoria global
+Indeterminismo: Orden total vs Orden Parcial
+• Posibles secuencias
+sin concurrencia:
+– 1, 2, a, b, c, d
+– a, b, c, d, 1, 2
+• Posibles secuencias
+concurrentes:
+– 1, a, b, c, 2, d
+– a, b, c, 1, 2, d
+– …
+• ¿Cuál es el Saldo?
+– 1, 2, a, b, c, d = 63
+– a, b, c, d, 1, 2 = 54
+– 1, a, b, c, 2, d = 58
+– a, b, c, 1, 2, d = 48
+1) ParaCaprichos= 0,5 * Saldo;
+2) Saldo = Saldo – ParaCaprichos;
+Programa 1
+a) Ahorro = 20;
+b) Saldo = Saldo + Ahorro
+c) ParaCaprichos = 0,1 * Saldo;
+d) Saldo = Saldo – ParaCaprichos;
+Programa 2
+Saldo = 100;
+Memoria global
+No Atomicidad e Indeterminismo
+• La cosa se puede complicar aún más
+• Las sentencias en lenguaje de alto nivel no son atómicas
+• También podemos encontrar el problema del orden parcial a
+nivel ensamblador (Interleaving)
+n = n + 1;
+load n, r1
+inc r1
+store r1, n
+COMPILADOR
+load n, r1
+inc r1
+store r1, n
+load n, r1
+inc r1
+store r1, n
+Proceso 1 Proceso 2
+CPU
+CPU
+CPU
+CPU
+Ejercicio
+• Si n es una variable global inicializada a 0 y ejecuto
+dos procesos con el siguiente código:
+¿cuál será el valor final de n?
+• Si el valor no es siempre el mismo ¿cuál es el menor
+y el mayor posible?
+for ( int i = 0 ; i < 10 ; i++ )
+n = n + 1;
+Recursos no compartibles
+Hardware
+• Pantalla
+• Impresora
+• Disco duro
+• Memoria
+Software
+• Variable
+• Permiso
+Recursos no compartibles son los que requieren de un acceso en modo
+exclusivo para realizar operaciones de modificación o escritura
+Conceptos Importantes:
+• Sección Crítica
+– Exclusión basada en acceso a un recurso (la SC son todos los trozos
+de código donde se accede a ese recurso)
+• Exclusión Mutua (solo un proceso)
+– En muchos casos entendemos por EM que solo puede estar UN proceso
+– P.e. Acceso a la pantalla.
+• Exclusión Mutua que permite varios procesos
+– Hay situaciones en que un recurso es compartible por algunos (no todos)
+procesos.
+– Normalmente en función del tipo de proceso o el número de procesos que ya
+hay en la sección crítica.
+– P.e. Acceso de lectura a un disco que no está siendo escrito.
+• Condiciones de sincronización
+– Es una exclusión basada en que se dé una determinada condición
+(trozos de código que solo se pueden ejecutar si se cumple algo)
+• P.e. Acceder a un buffer solo si hay elementos en dicho buffer.
+• Corrección en los programas
+– Los programas deben ser seguros y vivaces.
+Sección Crítica
+• Conjunto de instrucciones que acceden en modo lectura
+y/o escritura a los mismos recursos NO compartibles.
+• Las Condiciones de Bernstein permiten determinar qué
+parte del código se puede ejecutar de forma concurrente y
+cuál no.
+• Dos conjuntos de instrucciones puede ejecutarse
+concurrentemente siempre que los recursos NO
+compartibles en los que escriben sean distintos.
+• Las secciones críticas están asociadas a UN RECURSO x
+NO COMPARTIBLE.
+• Una sección crítica es un conjunto de instrucciones que
+queremos que se ejecuten de manera atómica (en
+exclusión mutua)
+Condiciones de Bernstein
+• L(Sk
+)={a1
+,a2
+,…,an
+} es el cjto de lectura del cjto de
+instrucciones Sk
+, y son todas las variables ai que se
+leen durante la ejecución de Sk
+.
+• E(Sk
+)={b1
+,b2
+,…,bn
+} es el cjto de escritura.
+• Las condiciones que deben cumplirse son:
+L(Si
+)ÇE(Sj
+) = Æ
+E(Si
+)ÇL(Sj
+) = Æ
+E(Si
+)ÇE(Sj
+) = Æ
+✗
+✗
+✓
+• Identifica las distintas secciones críticas y los
+problemas que pueden aparecer debidos al
+indeterminismo
+• ¡No se te olvide la pantalla!
+Ejercicio
+println(n);
+int i = 0;
+while ( i < n ) {
+r = r + s;
+i = i + 1;
+}
+n = 5;
+int i = 2;
+println(i);
+if (r > 3 || s < 2)
+println (“Ok”);
+p = p – s;
+int n = 0;
+int p = 5;
+int r = 0;
+int s = 2;
+Proceso 1 Proceso 2
+Memoria global
+println(n); n = 5;
+while ( i < n ) {
+r = r + s if (r > 3 || s < 2)
+println(n);
+println(i);
+println(n);
+Protección de secciones críticas
+• Es necesario garantizar que sólo un proceso pueda estar
+ejecutando la Sección Crítica (SCx) de un recurso x.
+• Antes de ejecutar la SCx se debe estar seguro de que el
+recurso está libre.
+• Después de ejecutar la SCx se debe informar al resto de
+procesos interesados que el recurso vuelve a estar libre.
+• Cada recurso(s) tendrá(n) sus SCs particulares.
+• Al tipo de sincronización donde solo un proceso puede
+estar ejecutándose a la vez le llamamos exclusión mutua.
+// Protocolo Entrada SCx
+SECCIÓN CRÍTICA RECURSO x
+// Protocolo Salida SCx
+Proceso 1
+// Protocolo Entrada SCx
+SECCIÓN CRÍTICA RECURSO x
+// Protocolo Salida SCx
+Proceso N
+…
+Protocolos entrada/salida de sección crítica
+Deben cumplir estas condiciones
+• Exclusión mutua
+– Ejecución exclusiva de la sección crítica.
+• Limitación en la espera
+– Ningún proceso debe esperar de forma indefinida
+para entrar en SC.
+• Progreso en la ejecución
+– Si la SC está libre un proceso que quiera entrar
+debe poder hacerlo.
+Exclusión mutua
+• Garantizar que sólo un proceso accede al mismo tiempo a
+un recurso no compartible (R).
+• Mientras un proceso está en su sección crítica relativa a R
+ningún otro proceso podrá estar ejecutando secciones
+críticas relativas a R.
+• Mientras R está siendo utilizado por un proceso, los demás
+procesos que deseen ejecutar una sección crítica relativa a
+R deberán quedar bloqueados a la espera de que el primero
+termine.
+• Si R está libre, cualquier proceso (y solo 1) podrá entrar a su
+sección crítica relativa a R.
+• Los protocolos de entrada/salida deben garantizar limitación
+en la espera y progreso en la ejecución.
+• Exclusión mutua
+• Condición de sincronización
+• Corrección de programas
+Condición de sincronización
+• Garantizar la ejecución en exclusión mutua de las
+secciones críticas puede no ser suficiente
+• ¿Qué pasa si un objeto de datos compartidos está en un
+estado inapropiado para ejecutar una acción determinada?
+(p.e. imagina que n nunca pueda ser negativa).
+• El proceso 2 debe esperar a que n tenga un valor apropiado
+por las acciones de otros procesos.
+• Aquí tenemos otro concepto importante en concurrencia:
+Una condición de sincronización
+n = n + 1; int y = n - 1;
+n = 0;
+Proceso 1 Memoria Global Proceso 2
+Condición de sincronización
+Captar Imagen
+Procesar y
+almacenar como
+JPG
+Buffer
+Las condiciones de sincronización
+son las relaciones de precedencia
+existentes entre los distintos
+procesos de una aplicación
+concurrente que deben cumplirse
+para que el resultado sea coherente
+Guardar en Buffer
+Leer del Buffer
+• Exclusión mutua
+• Condición de sincronización
+• Corrección de programas
+Corrección de los programas
+• Seguridad (Nada malo va a pasar)
+– Garantizar Exclusión Mutua
+– Garantizar Sincronización
+– Evitar Interbloqueos pasivos (deadlocks)
+• Vivacidad (Algo bueno pasará, eventualmente)
+– Evitar Interbloqueos activos (livelock)
+– Evitar Inanición
+• En el siguiente programa se espera que como
+resultado de su ejecución se imprima 110 ó 50. ¿es
+correcta la suposición?
+Ejercicio 1
+x = x + 10;
+if (x > 100) {
+println(x);
+} else {
+println(x-50);
+}
+int x = 100;
+Proceso 1 Proceso 2
+Memoria global
+WOOCLAP
+Parte 1
+Implementación de Exclusión Mutua
+(y Condición de Sincronización)
+• Inhibición de interrupciones
+• Basadas en memoria compartida
+– Espera ocupada
+– Semáforos
+– Monitores
+• Basadas en paso de mensajes
+– Paso de mensajes send/receive
+– Llamadas a procedimientos remotos
+– Invocaciones remotas
+Implementación de Exclusión Mutua
+Requisitos de un protocolo de entrada (cualquiera):
+• Limitación en la espera
+• Progreso en la ejecución
+• Válida para múltiples procesos
+– Que funcione para número indeterminado de procesos
+• Equitativa (si no hay prioridades en el problema)
+– No haya preferencias de unos procesos sobre otros
+-------------------------------------------------------------------------------------------------------------------------------------------------
+EXCLUSIÓN MUTUA (Pi procesos que contienen una sección
+crítica sobre el mismo recurso no compartible)
+// Protocolo Entrada SCx
+SECCIÓN CRÍTICA de P1 para Rx
+// Protocolo Salida SCx
+// Protocolo Entrada SC
+SECCIÓN CRÍTICA de Pn para Rx
+// Protocolo Salida SC
+…
+Implementación de Exclusión Mutua
+(y Condición de Sincronización)
+Implementación de EXCLUSIÓN MÚTUA mediante software:
+• Se tienen Pi procesos que contienen una sección crítica sobre el
+mismo recurso no compartible Rx.
+• Protocolos de entrada/salida: Secuencia de sentencias que
+enmarcan la sección crítica
+– Protocolo de Entrada: Comprueba condición que autoriza la entrada a SCx.
+– Protocolo de Salida: Indica que se ha terminado de ejecutar la SCx.
+P1 Pn
+// Protocolo Entrada SCx
+SECCIÓN CRÍTICA de P1 para Rx
+// Protocolo Salida SCx
+// Protocolo Entrada SCx
+SECCIÓN CRÍTICA de Pn para Rx
+// Protocolo Salida SCx
+…
+Inhibición de interrupciones
+(Monoprocesadores)
+• Los cambios de contexto también pueden
+implementarse así
+• Solución:
+• Sólo es válido en sistemas monoprocesador
+E/S
+P1
+Tiempo
+Deshabilitar Interrupciones;
+Sección crítica;
+Habilitar Interrupciones;
+Ejecución “simultánea” de dos
+procesos gracias a las interrupciones
+Espera ocupada
+• Consiste en mantener ocupada la CPU mientras que no se
+cumpla la condición necesaria para continuar.
+• La exclusión mutua se implementa teniendo como condición
+el hecho de que no haya ningún proceso en la sección crítica.
+• ¿Cómo?:
+– Pues comprobando continuamente el valor de una o más variables
+compartidas que indiquen este hecho.
+• La evaluación de la condición sirve para determinar si hay
+que seguir esperando o no.
+while (!condicion) // <- Espera ocupada | Protocolo
+{}; // | de
+Condicion = false; // | Entrada
+// Sección crítica o acción que esperaba condición
+condicion = true; // | Protocolo de salida
+// Resto proceso
+Primer intento de exclusión mutua
+• La variable ocupada indica el estado de la sección crítica, es
+global, compartida e inicialmente vale false.
+• Fijaos que podría haber expresado la condición en “positivo” (y
+usar libre y el while sería while(!libre) y luego libre=false en
+protocolo de entrada, y libre= true en protocolo de salida.
+• Este intento es incorrecto porque no proporciona exclusión mutua,
+while (true) {
+// Protocolo de entrada
+while (ocupada)
+{}; // do nothing
+ocupada = true;
+// Aquí Sección crítica
+// Protocolo de salida
+ocupada = false;
+// Resto proceso
+}
+while (true) {
+// Protocolo de entrada
+while (ocupada)
+{}; // do nothing
+ocupada = true;
+// Aquí Sección crítica
+// Protocolo de salida
+ocupada = false;
+// Resto proceso
+}
+Proceso 1 Proceso 2
+Segundo intento de exclusión mutua
+• La variable turno indica el proceso que tiene derecho a
+acceder al recurso no compartible, es global, compartida y su
+valor inicial puede ser cualquiera: 1 o 2.
+• Este intento es incorrecto porque no permite progreso en la
+ejecución
+while (true) {
+// Protocolo de entrada
+while (turno!= 1)
+{};
+// Sección crítica
+// Protocolo de salida
+turno = 2;
+// Resto proceso
+}
+while (true) {
+// Protocolo de entrada
+while (turno != 2)
+{};
+// Sección crítica
+// Protocolo de salida
+turno = 1;
+// Resto proceso
+}
+Proceso 1 Proceso 2
+Cuarto intento de exclusión mutua
+• Las variables quiereEntrarX indican el interés del proceso X por acceder
+al recurso o que ya lo tiene (true), o el hecho de que ya no lo necesitan
+(false). Son globales, compartidas e inicialmente valen false.
+• Este intento es incorrecto porque puede provocar espera
+infinita
+while (true) {
+// Protocolo de entrada
+quiereEntrar1= true;
+while (quiereEntrar2)
+{};
+// Sección crítica
+// Protocolo de salida
+quiereEntrar1 = false;
+// Resto proceso
+}
+while (true) {
+// Protocolo de entrada
+quiereEntrar2 = true;
+while (quiereEntrar1)
+{};
+// Sección crítica
+// Protocolo de salida
+quiereEntrar2 = false;
+// Resto proceso
+}
+Proceso 1 Proceso 2
+Algoritmo correcto de Peterson
+• Las variables quiereEntrarX indican el interés del proceso X por acceder
+al recurso o que ya lo tiene (true), o el hecho de que ya no lo necesitan
+(false). Son globales, compartidas e inicialmente valen false.
+• La variable turno indica el proceso que tiene derecho a acceder al
+recurso no compartible, es global, compartida y su valor inicial puede ser
+cualquiera: 1 o 2
+while (true) {
+// Protocolo de entrada
+quiereEntrar1 = true;
+turno = 2;
+while ( quiereEntrar2
+&& (turno == 2))
+{};
+// Sección crítica
+// Protocolo de salida
+quiereEntrar1 = false;
+// Resto proceso
+}
+Proceso 1 Proceso 2
+while (true) {
+// Protocolo de entrada
+quiereEntrar2 = true;
+turno = 1;
+while ( quiereEntrar1
+&& (turno == 1))
+{};
+// Sección crítica
+// Protocolo de salida
+quiereEntrar2 = false;
+// Resto proceso
+}
+Corrección de los programas
+• Seguridad
+– Garantizar Exclusión Mutua
+– Garantizar Sincronización
+– Evitar Interbloqueos pasivos (deadlocks)
+• Vivacidad
+– Evitar Interbloqueos activos (livelock)
+– Evitar Inanición
+Todos los procesos están detenidos esperando que
+ocurra algo que no pasará
+Interbloqueos Pasivos: Deadlock
+BloquearSiPantallaOcupada();
+ocupar(Pantalla);
+BloquearSiImpresoraOcupada();
+ocupar(Impresora);
+// Muestro e imprimo
+liberar(Impresora);
+liberar(Pantalla);
+BloquearSiImpresoraOcupada();
+ocupar(Impresora);
+BloquearSiPantallaOcupada();
+ocupar(Pantalla);
+// Muestro e imprimo
+liberar(Impresora);
+liberar(Pantalla);
+Proceso 1 Proceso 2
+Un proceso no está detenido, ejecuta código, pero no consigue
+progresar en su ejecución (abajo es livelock infinito).
+Interbloqueos Activos: Livelock
+while (!libre(Impresora)) {
+sleep(10);
+}
+ocupar(Impresora);
+// Imprimir
+liberar(Impresora);
+while (true) {
+if (libre(Impresora)) {
+ocupar(Impresora);
+// Imprimir (3 segundos)
+liberar(Impresora);
+}
+}
+Proceso 1 Proceso 2
+while (true) {
+quiereEntrar1= true;
+while (quiereEntrar2)
+{};
+// Sección crítica
+quiereEntrar1 = false;
+// Resto proceso
+}
+while (true) {
+quiereEntrar2 = true;
+while (quiereEntrar1)
+{};
+// Sección crítica
+quiereEntrar2 = false;
+// Resto proceso
+}
+Inanición
+• Siendo n una variable global compartida inicializada a 0
+Proceso 1 Proceso 2
+Algún proceso no puede llegar a progresar nunca
+while (n % 2 == 0 ) // espera
+{}; // si n es par
+// Realizar cálculos
+while (true) {
+n = n + 2;
+}
+Ejercicio 2. Solución
+int x = 0;
+while ( x == 0) TAS(x);
+// Sección Crítica
+c = 1;
+// Resto proceso
+int c = 1;
+Proceso 1 Proceso 2
+Memoria global
+int x = 0;
+while ( x == 0) TAS(x);
+// Sección Crítica
+c = 1;
+// Resto proceso
+Ejercicio 2. ¿Solución?
+int x = 0;
+while ( x == 0) {
+x = c;
+c = 0;
+}
+// Sección Crítica
+c = 1;
+// Resto proceso
+int c = 1;
+Proceso 1 Proceso 2
+Memoria global
+int x = 0;
+while ( x == 0) {
+x = c;
+c = 0;
+}
+// Sección Crítica
+c = 1;
+// Resto proceso
+Si sustituimos TAS(x) por sus dos instrucciones ¿sigue
+siendo una solución válida?
+Ejercicio 3
+Supongamos que disponemos de un contador de energía eléctrica que genera
+impulsos cada vez que se consume un Kw de energía y queremos
+implementar un sistema que cuente el número de impulsos generados en una
+hora, es decir, que cuente el número de Kw consumidos en una hora. Para
+ello el sistema estará formado por dos procesos.
+–Un proceso acumulador que lleva la cuenta de los impulsos recibidos.
+–Un proceso escritor que escribe en la impresora cada hora los impulsos recibidos.
+En una variable compartida por los dos procesos (n) se lleva la cuenta de los
+impulsos. Si el sistema se encuentra en un estado correspondiente al valor de
+la variable n=x y, en estas condiciones, se produce (a la vez) un nuevo
+impulso y el final de período de una hora, obtener las posibles secuencias de
+ejecución de los procesos y cuáles de ellas son correctas.
+1. n++; println(n); n = 0; (CORRECTO)
+2. prinlnt(n); n++; n = 0; (INCORRECTO)
+3. println(n); n = 0 ; n++; (CORRECTO)
+4. ¿Alguna más?
+1. n++, en ensamblador es load, inc y store…
+Ejercicio 3. Solución
+while (true) {
+// Espera impulso
+n++;
+}
+int n = N;
+Proceso Acumulador Proceso Contador
+Memoria global en el instante actual
+while (true) {
+// Espera 1h
+println(n);
+n = 0;
+}
+Ejercicio 4
+• Supongamos que dos procesos concurrentes P1 y P2 intentan usar el
+mismo dispositivo de E/S. Concretamente, supongamos que P1 intenta
+leer del bloque 20 del dispositivo y P2 intenta escribir en el bloque 88.
+• Si las operaciones read y write no fueran atómicas y se descomponen en
+las básicas (saltar y leer o saltar y escribir) se podrían producir problemas.
+• En este caso, indicar las distintas secuencias de ejecución posibles para
+P1 y P2 razonando cuáles son correctas y cuáles no.
+Ejercicio 4. Solución
+1ª secuencia: saltar 20, leer, saltar 88, escribir
+(correcta)
+2ª secuencia: saltar 20, saltar 88, escribir, leer
+(incorrecta)
+3ª secuencia: saltar 88, saltar 20, escribir, leer
+(incorrecta)
+4ª secuencia: saltar 88, escribir, saltar 20, leer
+(correcta)
+5ª secuencia: saltar 20, saltar 88, leer, escribir
+(incorrecta)
+6ª secuencia: saltar 88, saltar 20, leer, escribir
+(incorrecta)
+• ¿Cuál será el valor mostrado por la pantalla?
+Ejercicio 5
+while (!parar) {
+n = n + 1;
+sleep(1);
+}
+sleep(5);
+parar = true;
+println(n);
+int n = 0;
+boolean parar = false;
+Proceso 1 Proceso 2
+Memoria global
+
+Programación Concurrente y 
+Distribuida
+Tema 3. Semáforos
+Infografía
+Contexto
+• Sistemas basados en memoria compartida con 
+aplicaciones compuestas por procesos que:– Acceden a Recursos no compartibles– Requieren de Reglas de sincronización
+• Problemas– Ejecución simultánea => 
+orden parcial + no atomicidad de sentencias de alto nivel =>
+indeterminismo + Recursos no compartibles => 
+Programas incorrectos => 
+Resultados incorrectos
+• Necesitamos– Garantizar Exclusión Mutua– Garantizar las Condiciones de Sincronización
+Contexto
+• Soluciones basadas en inhibición de 
+interrupciones– Sólo son válidas en monoprocesadores
+• Soluciones basadas en espera ocupada– Ineficientes
+• ¿Semáforos?
+Definición y tipos de semáforos
+• Tipo de Dato Abstracto– Representa un valor entero positivo– Tiene tres operaciones: wait, signal e initial
+• Semáforo Binario– Sólo puede tomar los valores 0 y 1
+• Semáforo General– Puede tomar cualquier valor mayor o igual a 0
+Operaciones
+• Operación initial(Semaphore s, int v)– Asigna v como valor inicial al semáforo s. Debe ser mayor o igual que 
+cero.
+• Operación wait(Semaphore s)– Si el valor del semáforo s es mayor que cero lo decrementa. Si no, 
+bloquea al proceso que la invoca y lo guarda en una lista asociada a s– La operación se ejecuta de forma atómica y en exclusión mutua
+• Operación signal(Semaphore s)– Si hay procesos bloqueados en la lista asociada a s, desbloquea uno 
+• ¿cuál? – Si no hay procesos bloqueados, incrementa el valor del semáforo 
+• ¿siempre?– Se ejecuta de forma atómica y en exclusión mutua
+Exclusión Mutua con Semáforos
+• Una de las necesidades que 
+teníamos era conseguir 
+EXCLUSIÓN MÚTUA
+• Uso de semáforos binarios 
+(inicializados a 1)
+• Un semáforo por sección crítica
+• Garantiza que sólo un proceso 
+puede acceder al mismo tiempo 
+al recurso no compartible
+• Garantiza que si está libre 
+cualquiera puede acceder
+Inicialización
+initial(s, 1);
+P1
+wait(s); //prot. Ent.
+// Sección Crítica
+signal(s); //prot. Sal.
+…
+Pk
+wait(s);
+// Sección Crítica
+signal(s);
+Ejemplo
+Inicialización
+initial(pantalla, 1);
+P1
+wait(pantalla);
+println(“Hola soy el proceso 1”);
+signal(pantalla);
+// Protoc. Entr.
+// Protoc. Sal.
+…
+Pk
+wait(pantalla);
+println(“Hola soy el proceso k”);
+signal(pantalla);
+// Protoc. Entr.
+// Protoc. Sal.
+Condición de Sincronización con Semáforos
+• La otra necesidad que teníamos 
+era SINCRONIZAR procesos.
+• Uso de semáforos generales
+• Importancia de la inicialización
+• Un semáforo por condición
+• Escenarios comunes:
+• Uno espera a otro
+• Uno espera a muchos
+• Muchos esperan a uno
+• También se pueden usar para 
+reflejar el número de recursos libres
+Inicialización
+initial(s, v);
+P1
+wait(s);
+// Acción que necesita 
+// una determinada condición.
+…
+Pk
+// Se produce un 
+// cambio en la condición.
+signal(s);
+Escenario uno espera a otro
+• Un proceso necesita que otro haga algo antes de poder hacer 
+él su trabajo. 
+• Se usa un único semáforo general inicializado a 0
+• El proceso que debe esperar usa wait justo antes de hacer 
+su tarea.
+• El proceso esperado usa signal al acabar su parte.
+P1
+dato = random();
+signal(listo);
+Inicialización
+int dato = 0;
+initial(listos, 0);
+P2
+wait(listo);
+println(dato);
+Escenario uno espera a muchos
+• Un proceso necesita que varios lleven a cabo sus tareas individuales 
+antes de poder hacer él su trabajo. 
+• Se usa un único semáforo general inicializado a 0
+• El proceso que espera hace tantos wait como procesos se deba 
+esperar justo antes de hacer su tarea.
+• Cada proceso de los esperados hace un signal al acabar su parte.
+• Si hay que asegurar una única señal por cada proceso se usa un 
+array de semáforos.
+PK
+for ( int i = 0 ; i < K ; i++ ) {
+wait(listos);
+}
+int total = 0;
+for ( int i = 0 ; i < K ; i++ ) {
+total += dato[i];
+}
+println(total);
+Inicialización
+int K = 5;
+int []dato = new int[K];
+initial(listos, 0);
+Pi /  i  [0..K-1]
+dato[i] = random();
+signal(listos);
+Escenario muchos esperan a uno
+• Varios procesos necesitan que otro realice su tarea antes de 
+poder continuar ellos con las suyas.
+• Se usa un semáforo por cada proceso que deba esperar y 
+todos se inicializan a 0.
+• Cada proceso de los que esperan hace wait sobre su 
+semáforo justo antes de su tarea.
+Inicialización
+int K = 5;
+for ( int i = 0 ; i < K ; i++ ) {
+initial(listo[i], 0);
+}
+int dato = 0;
+Pk
+dato = VALOR_DESEADO;
+for ( int i = 0 ; i < K ; i++ ) {
+signal(listo[i]);
+}
+• El proceso esperado por 
+todos hace un signal a 
+cada semáforo al acabar su 
+parte.
+Pi /  i  [0..K-1]
+while (true) {
+wait(listo[i]);
+println(dato * i);
+}
+Ejemplo 1
+• P2 nodebe ejecutar d hasta que P1 haya ejecutado a
+Initial(s,0);
+process P1;
+begin
+a;
+signal(s);
+b;
+end;
+process P2;
+begin
+c;
+wait(s);
+d;
+end;
+Ejemplo 2
+• P1 yP2 deben esperarse en el punto medio
+Initial(s,0);
+Initial(t,0)
+process P1;
+begin
+a;
+signal(s);
+wait(t);
+b;
+end;
+process P2;
+begin
+c;
+signal(t);
+wait(s);
+d;
+end;
+Ejemplo 3
+• P2sólodebeejecutardsi:
+P1haejecutadoaosiP3haejecutadoe
+process P1;
+begin
+repeat
+a;
+b;
+forever
+end;
+process P2;
+begin
+repeat
+c;
+d;
+forever
+end;
+signal(s); wait(s);
+Initial(s,0);
+process P3;
+begin
+repeat
+e;
+f;
+forever
+end;
+signal(s);
+Ejemplo 4
+• P2sólodebeejecutardsi:
+P1haejecutadoayP3haejecutadoe
+process P1;
+begin
+repeat
+a;
+b;
+forever
+end;
+process P2;
+Begin
+repeat
+c;
+d;
+forever
+end;
+signal(s); wait(s);
+Initial(s,0);
+process P3;
+begin
+repeat
+e;
+f;
+forever
+end;
+signal(s);
+wait(s);
+Ejemplo 4 bis
+• P2sólodebeejecutardsi:
+P1haejecutadoayP3haejecutadoe
+process P1;
+begin
+repeat
+a;
+b;
+forever
+end;
+process P2;
+begin
+repeat
+c;
+d;
+forever
+end;
+signal(s); wait(s);
+Initial(s,0); Initial(t,0);
+process P3;
+begin
+repeat
+e;
+f;
+forever
+end;
+signal(t);
+wait(t);
+Binarios vs Generales
+Binario General
+Uso Exclusión Mutua Sincronización
+Inicialización 1 0..n
+¿Cuándo usar signal? Justo después de la 
+sección crítica
+Justo después de hacer 
+cierta la condición
+¿Cuándo usar wait? Justo antes de la sección 
+crítica
+Antes del código que 
+necesita que la condición 
+sea cierta
+Problemas Clásicos
+• Productor/Consumidor
+• Lectores y Escritores
+• Cena de los Filósofos
+Productor / Consumidor
+• Proceso que genera información (productor) que es utilizada 
+por otro proceso (consumidor)
+• Comunicación a través de un elemento compartido
+• La posible diferencia de velocidad de ejecución requiere 
+ampliar el escenario usando una cola compartida
+Elemento
+productor
+cola
+consumidor
+…
+productor
+consumidor
+Procesos Acoplados
+Procesos Desacoplados
+Productor / Consumidor
+Esquema básico
+(sin aplicar mecanismos de sincronización ni exclusión mútua en secciones críticas)
+Inicialización / Memoria Global
+Cola cola = new Cola();
+Proceso Productor
+while (true) {
+// Producir elemento
+Elemento e = new Elemento();
+// Insertar elemento
+cola.push(e);
+}
+Proceso Consumidor
+while (true) {
+// Extraer elemento 
+Elemento e = cola.pop();
+// Consumir elemento
+e.usa();
+}
+Productor / Consumidor
+• Si el buffer es infinito sólo es necesario frenar al consumidor 
+en espera de que haya elementos nuevos
+while(true) {
+// Esperar que cola != vacio
+// Extraer elemento 
+Elemento e = cola.pop();
+// Consumir elemento
+e.usa();
+}
+Proceso Consumidor
+while (true) {
+// Producir elemento
+Elemento e = new Elemento();
+// Insertar elemento
+cola.push(e);
+}
+Proceso Productor
+Cola cola = new Cola();
+Inicialización / Memoria Global
+Productor / Consumidor
+• Si el buffer es limitado hay que frenar a ambos procesos ya 
+que el productor también debe esperar a que haya hueco 
+libre
+while (true) {
+// Esperar que cola != vacio
+// Extraer elemento 
+Elemento e = cola.pop();
+// Indicar cambio en cola
+// Consumir elemento
+e.usa();
+}
+Proceso Consumidor
+while (true) {
+// Producir elemento
+Elemento e = new Elemento();
+// Esperar que cola != lleno
+// Insertar elemento
+cola.push(e);
+// Indicar cambio en cola
+}
+Proceso Productor
+Cola cola = new Cola();
+Inicialización / Memoria Global
+Análisis del Productor / Consumidor (1/1)
+• Recursos no compartibles– Recursos:
+• La cola según cómo esté implementada (para 1 productor y 1 consumidor)– Secciones críticas:
+• Las instrucciones de inserción y extracción sobre la cola si esta es 
+un recurso NO compartible– Exclusión mutua:
+• Depende de si la cola es o no compartible
+• Condiciones de sincronización (hay 2)– Antes de insertar debe haber hueco libre (semáforo 
+general huecos inicializado al tamaño de la cola)– Antes de extraer debe haber algún elemento (semáforo 
+general usados inicializado a 0)
+Productor / Consumidor
+Solución con semáforos: Cola tamaño máximo N
+(Atentos: No hemos hecho exclusión mutua en la cola)
+En bib. a huecos se le llama vacios
+y a usados se le llama llenos.
+Proceso Productor
+while (true) {
+// Producir elemento
+Elemento e = new Elemento();
+// Esperar cola != lleno
+wait(huecos); // Sincronización
+// Insertar elemento
+cola.push(e);
+}
+// Indicar cambio cola
+signal(usados); // Sincroniz.
+Inicialización
+Cola cola = new Cola();
+initial(huecos, N); //IMPORTANTE
+initial(usados, 0);
+Proceso Consumidor
+while (true) {
+// Esperar cola != vacio
+wait(usados); // Sincronización
+// Extraer elemento 
+Elemento e = cola.pop();
+//Indicar cambio cola
+signal(huecos); // Sincroniz.
+// Consumir elemento
+e.usa();
+}
+Productores
+/ Consumidores
+(1+/1+)
+• Si, además, hay más de un proceso productor o consumidor 
+es necesario acceder en exclusión mutua al buffer
+productor
+…
+productor
+productor
+consumidor
+consumidor
+consumidor
+• El código de inserción y de extracción de elementos en la 
+cola pasa a ser una Sección Crítica siempre.
+• Es necesario usar un semáforo binario para garantizar la 
+exclusión mutua de dichas secciones críticas (mutex)
+Productores/ Consumidores
+• Solución con semáforos: Cola tamaño 
+máximo N y varios 
+productores/consumidores
+while (true) {
+// Producir elemento
+Elemento e = new Elemento();
+// Esperar cola != lleno
+wait(huecos); // Sincronización
+// Insertar elemento
+wait(mutex); // acceso a cola
+cola.push(e);  
+signal(mutex);
+// Indicar cambio cola
+signal(usados); // Sincronización
+}
+while (true) {
+// Esperar cola != vacio
+wait(usados); // Sincronización
+// Extraer elemento
+wait(mutex); // acceso a cola
+Elemento e = cola.pop();
+signal(mutex);
+// Indicar cambio cola
+signal(huecos); // Sincroniz.
+// Consumir elemento
+e.usa();
+}
+Cola cola = new Cola();
+initial(huecos, N);
+initial(usados, 0);
+initial(mutex, 1);
+Inicialización
+Proceso Consumidor (Tipo) Proceso Productor (Tipo)
+Lectores / Escritores
+• Procesos que acceden a un recurso en modo lectura 
+(lectores) y procesos que acceden en modo escritura al 
+mismo recurso (escritores).
+Escritor
+Escritor
+Lector
+Lector
+Lector
+Recurso:
+BBDD
+WEB
+Disco Duro
+• Prioridad lectores: ningún lector debe 
+esperar salvo que un escritor esté 
+escribiendo. Un lector no espera por el 
+simple hecho de que haya un escritor 
+esperando.
+• Prioridad escritores: cuando un escritor 
+espera, debe escribir lo antes posible. Es 
+decir, ningún nuevo lector debe iniciar su 
+lectura si hay algún escritor esperando.
+Lectores / Escritores
+Prioridad Lectores
+Prioridad Escritores
+Recurso Nuevo Lector Nuevo Escritor
+Libre ✓ ✓
+Lectura ✓ ✗
+Escritura ✗ ✗
+Recurso Nuevo Lector Nuevo Escritor
+Libre ✓ ✓
+Lectura Sólo si no hay escritores 
+esperando
+✗
+Escritura ✗ ✗
+Análisis Lectores / Escritores 
+(prioridad lectores)
+• Recursos no compartibles– Recursos:
+• En principio el recurso leído/escrito sólo es “no compartible” (en verdadera exclusión 
+mutua) si algún proceso está escribiendo en él– Secciones críticas (hay 2):
+1. Las instrucciones de escritura en el recurso. Además, las de lectura no pueden 
+ejecutarse simultáneamente
+a las de escritura.
+2. Accesos de lectura/escritura a variables compartidas (nl) (una SC para las variables 
+involucradas en la implementación del protocolo de entrada y salida).– Exclusión mutua:
+• (semáforo mutexRec) Al acceder al recurso para escribir o leer (el primer/último 
+escritor lo debe tener),
+• (semáforo mutexNl):Variable controladora compartida nl que cuenta el número 
+de lectores en la sección crítica (la leen y escriben los lectores).
+• Condiciones de sincronización– Hay que impedir que se lea si hay otro proceso escribiendo.– Hay que impedir que se escriba si hay otro/s proceso/s leyendo o escribiendo.
+Lectores / Escritores
+Esquema básico
+Proceso Tipo Lector
+while (true) {
+// Protocolo Entrada Lector
+}
+LEER DEL RECURSO
+// Protocolo Salida Lector
+Proceso Tipo Escritor
+while (true) {
+//Protocolo entrada Escritor
+}
+ESCRIBIR EN EL RECURSO
+// Protocolo salida Escritor
+• Prioridad Lectores
+Lectores / Escritores
+while (true) {
+// Protocolo Entrada Lector
+wait(mutexNL); 
+nl++;
+if (nl == 1) wait(mutexR);
+signal(mutexNL);
+LEER DEL RECURSO
+// Protocolo Salida Lector
+wait(mutexNL); 
+nl--;
+if (nl == 0) signal(mutexR);
+signal(mutexNL);
+}
+while (true) {
+//Protocolo entrada Escritor
+wait(mutexRec);
+ESCRIBIR EN EL RECURSO
+// Protocolo salida Escritor
+signal(mutexRec);
+}
+int nl = 0;
+initial(mutexR, 1);
+initial(mutexNL, 1);
+Inicialización / Memoria Global
+Proceso Tipo Escritor Proceso Tipo Lector
+int nl = 0;
+initial(mutexRec, 1);
+initial(mutexNL, 1);
+while (true) {
+// Protocolo Entrada Lector
+wait(mutexNL); 
+nl++;
+if (nl == 1) wait(mutexRec);
+signal(mutexNL);
+LEER DEL RECURSO
+// Protocolo Salida Lector
+wait(mutexNL); 
+nl--;
+if (nl == 0) signal(mutexRec);
+signal(mutexNL);
+}
+Análisis Lectores / Escritores 
+(prioridad escritores) Espera Ocupada
+• Recursos no compartibles– Recursos:
+• En principio el recurso leído/escrito sólo es “no compartible” si algún proceso está 
+escribiendo en él.– Secciones críticas:
+1. Las instrucciones de escritura en el recurso. Además, las de lectura no pueden ejecutarse 
+simultáneamente a las de escritura.
+2. Accesos de lectura/escritura a variables compartidas (nl, nee, escribiendo). Es decir, hay una SC para las 
+variables involucradas en la implementación del protocolo de entrada y salida).– Exclusión mutua:
+• Al acceder al recurso para escribir o leer (evitar escritores). (Atención: No está 
+“dentro” de un semáforo, pero se consigue con el protocolo entrada/salida)
+• (semáforo mutex): Variables controladoras compartidas: – (nl) cuenta el número de lectores en la sección crítica (la leen escritores y la escriben los lectores) .– (nee) cuenta el número de escritores esperando (la leen lectores y escriben escritores).– (escribiendo) Indica si hay un escritor en la sección crítica (la leen todos y escriben escritores).
+• Condiciones de sincronización– Hay que impedir que un nuevo lector acceda si algún escritor está escribiendo o manifestó su 
+intención con anterioridad. Es necesario determinar cuándo un proceso quiere escribir.– Hay que impedir que se escriba si hay otro/s proceso/s leyendo o escribiendo.
+Lectores / Escritores
+Inicialización / Memoria Global
+Prioridad Escritores con 
+espera ocupada (1/4)
+Proceso Tipo Lector
+while (true) {
+//Protocolo entrada Lector
+Esperar mientras que haya procesos
+escribiendo o esperando para escribir
+nl++;
+nl--;
+}
+LEER DEL RECURSO
+// Protocolo Salida Lector
+int nl = 0, nee = 0;
+boolean escribiendo = false;
+initial(mutex, 1);
+int nl = 0, nee = 0;
+boolean escribiendo = false;
+Proceso Tipo Escritor
+while (true) {
+//Protocolo entrada Escritor
+nee++;
+Esperar mientras que haya procesos
+escribiendo o leyendo
+nee--;
+escribiendo = true;
+ESCRIBIR EN EL RECURSO
+// Protocolo salida Escritor
+escribiendo = false;
+}
+Lectores / Escritores
+Inicialización / Memoria Global
+Prioridad Escritores con 
+espera ocupada (2/4)
+Proceso Tipo Lector
+while (true) {
+//Protocolo entrada Lector
+while (nee>0 || escribiendo) {
+}
+nl++;
+nl--;
+}
+LEER DEL RECURSO
+// Protocolo Salida Lector
+int nl = 0, nee = 0;
+boolean escribiendo = false;
+int nl = 0, nee = 0;
+boolean escribiendo = false;
+initial(mutex, 1);
+Proceso Tipo Escritor
+while (true) {
+//Protocolo entrada Escritor
+nee++;
+while(nl > 0 || escribiendo) {
+}
+nee--;
+escribiendo = true;
+ESCRIBIR EN EL RECURSO
+// Protocolo salida Escritor
+escribiendo = false;
+}
+Lectores / Escritores
+Inicialización / Memoria Global
+Prioridad Escritores con 
+espera ocupada (3/4)
+Proceso Tipo Lector
+while (true) {
+//Protocolo entrada Lector
+wait(mutex);
+while (nee>0 || escribiendo) {
+signal(mutex);
+wait(mutex);
+}
+nl++;
+signal(mutex);
+nl--;
+}
+LEER DEL RECURSO
+// Protocolo Salida Lector
+int nl = 0, nee = 0;
+boolean escribiendo = false;
+int nl = 0, nee = 0;
+boolean escribiendo = false;
+initial(mutex, 1);
+initial(mutex, 1);
+Proceso Tipo Escritor
+while (true) {
+//Protocolo entrada Escritor
+wait(mutex);
+nee++;
+while(nl > 0 || escribiendo) {
+signal(mutex);
+wait(mutex);
+}
+nee--;
+escribiendo = true;
+signal(mutex);
+ESCRIBIR EN EL RECURSO
+// Protocolo salida Escritor
+escribiendo = false;
+}
+Lectores / Escritores
+Inicialización / Memoria Global
+Prioridad Escritores con 
+espera ocupada (4/4)
+Proceso Tipo Lector
+while (true) {
+//Protocolo entrada Lector
+wait(mutex);
+while (nee>0 || escribiendo) {
+signal(mutex);
+wait(mutex);
+}
+nl++;
+signal(mutex);
+LEER DEL RECURSO
+// Protocolo Salida Lector
+wait(mutex); 
+nl--;
+}
+signal(mutex);
+int nl = 0, nee = 0;
+boolean escribiendo = false;
+initial(mutex, 1);
+int nl = 0, nee = 0;
+boolean escribiendo = false;
+initial(mutex, 1);
+Proceso Tipo Escritor
+while (true) {
+//Protocolo entrada Escritor
+wait(mutex);
+nee++;
+while(nl > 0 || escribiendo) {
+signal(mutex);
+wait(mutex);
+}
+nee--;
+escribiendo = true;
+signal(mutex);
+ESCRIBIR EN EL RECURSO
+// Protocolo salida Escritor
+wait(mutex);
+escribiendo = false;
+signal(mutex);
+}
+Análisis Lectores / Escritores 
+(prioridad escritores) Con bloqueo, y desbloqueo encadenado
+• Recursos no compartibles– Recursos:
+• En principio el recurso leído/escrito sólo es “no compartible” si algún proceso está 
+escribiendo en él– Secciones críticas
+1. Las instrucciones de escritura en el recurso. Además, las de lectura no pueden ejecutarse 
+simultáneamente a las de escritura.
+2. Accesos de lectura/escritura a variables compartidas (nl, nee, nle, escribiendo).– Exclusión mutua
+• Al acceder al recurso para escribir o leer. (Atención: No está “dentro” de un 
+semáforo, pero se consigue con el protocolo entrada/salida)
+• (semáforo mutex) Variables controladoras compartidas: – (nl) cuenta el número de lectores en la sección crítica (la leen todos y la escriben los lectores) – (nee) cuenta el número de escritores esperando (la leen todos y escriben escritores) – (nle) cuenta el número de lectores esperando (la leen todos y la escriben lectores) – (escribiendo) Indica que un proceso escritor tiene acceso al recurso (la leen todos, la escriben escritores).
+• Condiciones de sincronización– Hay que impedir que un nuevo lector acceda si algún escritor está escribiendo o manifestó su 
+intención con anterioridad. Es necesario determinar cuándo un proceso quiere escribir.– Hay que impedir que se escriba si hay otro/s proceso/s leyendo o escribiendo
+El semáforo escribir bloquea los escritores en espera, y el leer bloquea a los lectores en espera.
+Lectores / Escritores
+Prioridad Escritores (1/8) int nl = 0, nee = 0; 
+boolean escribiendo = false;
+initial(mutex, 1);
+Inicialización / Memoria Global
+Proceso Tipo Escritor
+Proceso Tipo Lector
+while(true) {
+wait(mutex);
+if( nee>0 || escribiendo) {
+}
+nl++;
+signal(mutex);
+LEER DEL RECURSO
+wait(mutex); 
+nl--;
+signal(mutex);
+}
+while(true) {
+wait(mutex);
+if(nl> 0 || escribiendo) {
+}
+escribiendo = true;
+signal(mutex);
+ESCRIBIR EN EL RECURSO
+wait(mutex);
+escribiendo = false;
+signal(mutex);
+}
+Indicar que hay uno más 
+esperando y bloquear al lector Indicar que hay uno más 
+esperando y bloquear al escritor
+Lectores / Escritores
+Inicialización / Memoria Global
+Prioridad Escritores (2/8)
+• Si hay lectores o se está escribiendo el 
+escritor debe esperar.
+• neese usa en exclusión mutua, 
+deberíamos tener el mutex
+• En el protocolo de salida tenemos que 
+liberar escribir…
+• … y después liberar el mutex
+• Si había un escritor esperando lo 
+primero que tiene que hacer es un pedir 
+el mutex.
+• ¿Por qué no “pasarle el mutex” 
+directamente?
+• Si solo hago un signal (escribir) el que 
+despierta “tendría” ya el mutex.
+• Pero solo si hay escritores esperando…
+• … si no hay esperando libero el mutex.
+int nl = 0, nee = 0;
+boolean escribiendo = false;
+initial(mutex, 1);
+initial(escribir, 0);
+Proceso Tipo Escritor
+while (true) {
+wait(mutex);
+if (nl > 0 || escribiendo) {
+nee++;
+signal(mutex);
+wait(escribir);
+// ¿wait(mutex)?
+nee--;
+}
+escribiendo = true;
+signal(mutex);
+ESCRIBIR EN EL RECURSO
+wait(mutex);
+escribiendo = false;
+// ¿signal(escribir)?
+signal(mutex);
+}
+Lectores / Escritores
+Inicialización / Memoria Global
+Prioridad Escritores (3/8)
+• A esto se le llama “cesión de la 
+exclusión mutua”
+• Se hace un signal(escribir) (pero 
+sin hacer el signal(mutex)) el 
+proceso escritor que sale del 
+wait(escribir) es como si tuviera el 
+mutex (como si hubiera hecho un 
+wait(mutex) tras salir del wait
+(escribir) y lo hubiese adquirido)
+• Si no hay escritores esperando hay 
+que devolver el mutex (y no hace 
+falta desbloquear escritores, 
+porque no hay escritores 
+bloqueados) entonces…
+int nl = 0, nee = 0;
+boolean escribiendo = false;
+initial(mutex, 1);
+initial(escribir, 0);
+Proceso Tipo Escritor
+while (true) {
+while (true) {
+wait(mutex);
+if (nl > 0 || escribiendo) {
+nee++;
+signal(mutex);
+wait(escribir);
+nee--;
+}
+escribiendo = true;
+signal(mutex);
+ESCRIBIR EN EL RECURSO
+wait(mutex);
+if (nl > 0 || escribiendo) {
+nee++;
+signal(mutex);
+wait(escribir);
+nee--;
+}
+escribiendo = true;
+signal(mutex);
+ESCRIBIR EN EL RECURSO
+}
+wait(mutex);
+escribiendo = false;
+wait(mutex);
+escribiendo = false;
+if (nee > 0) signal(escribir);
+else if (nle > 0) 
+signal(leer);
+else signal(mutex);
+if (nee > 0) signal(escribir);
+else signal(mutex);
+}
+Lectores / Escritores
+Inicialización / Memoria Global
+Prioridad Escritores (4/8)
+Proceso Tipo Lector
+while (true) {
+while (true) {
+wait(mutex);
+if ( nee>0 || escribiendo) {
+signal(mutex);
+wait(leer);
+Indicar que hay uno más 
+esperando y bloquear al lector 
+}
+nl++;
+wait(mutex);
+if ( nee>0 || escribiendo) {
+nle++;
+signal(mutex);
+wait(leer);
+nle--;
+}
+nl++;
+if (nle > 0) signal(leer);
+else signal(mutex);
+LEER DEL RECURSO
+signal(mutex);
+LEER DEL RECURSO
+wait(mutex); 
+nl--;
+wait(mutex); 
+nl--;
+if (nl == 0 && nee > 0)
+signal(escribir);
+else
+signal(mutex);
+signal(mutex);
+}
+int nl = 0, nee = 0; 
+boolean escribiendo = false;
+initial(mutex, 1);
+initial(escribir, 0);
+initial(leer, 0);
+Proceso Tipo Escritor
+while (true) {
+wait(mutex);
+if (nl > 0 || escribiendo) {
+nee++;
+signal(mutex);
+wait(escribir);
+nee--;
+}
+escribiendo = true;
+signal(mutex);
+ESCRIBIR EN EL RECURSO
+while (true) {
+wait(mutex);
+if (nl > 0 || escribiendo) {
+nee++;
+signal(mutex);
+wait(escribir);
+nee--;
+}
+escribiendo = true;
+signal(mutex);
+ESCRIBIR EN EL RECURSO
+wait(mutex);
+escribiendo = false;
+wait(mutex);
+escribiendo = false;
+if (nee > 0) signal(escribir);
+else if (nle > 0) 
+signal(leer);
+else signal(mutex);
+if (nee > 0) signal(escribir);
+else signal(mutex);
+✗
+}
+}
+}
+Lectores / Escritores PE (5/8)
+Inicialización / Memoria Global
+solo se “despierta” un lector, pero…
+¡habría que despertar a todos!
+Pero no se pueden despertar iterando, sino ¡en cadena!
+Proceso Tipo Lect¡or
+while (true) {
+while (true) {
+wait(mutex);
+if ( nee>0 || escribiendo) {
+nle++;
+signal(mutex);
+wait(leer);
+nle--;
+}
+nl++;
+wait(mutex);
+if ( nee>0 || escribiendo) {
+nle++;
+signal(mutex);
+wait(leer);
+nle--;
+}
+nl++;
+if (nle > 0) signal(leer);
+else signal(mutex);
+LEER DEL RECURSO
+signal(mutex);
+LEER DEL RECURSO
+wait(mutex); 
+nl--;
+✗
+wait(mutex); 
+nl--;
+if (nl == 0 && nee > 0)
+signal(escribir);
+else
+signal(mutex);
+signal(mutex);
+}
+int nl = 0, nee = 0, nle = 0; 
+boolean escribiendo = false;
+initial(mutex, 1);
+initial(escribir, 0);
+initial(leer, 0);
+Proceso Tipo Escritor
+while (true) {
+wait(mutex);
+if (nl > 0 || escribiendo) {
+nee++;
+signal(mutex);
+wait(escribir);
+nee--;
+}
+escribiendo = true;
+signal(mutex);
+ESCRIBIR EN EL RECURSO
+while (true) {
+wait(mutex);
+if (nl > 0 || escribiendo) {
+nee++;
+signal(mutex);
+wait(escribir);
+nee--;
+}
+escribiendo = true;
+signal(mutex);
+ESCRIBIR EN EL RECURSO
+wait(mutex);
+escribiendo = false;
+wait(mutex);
+escribiendo = false;
+if (nee > 0) signal(escribir);
+else if (nle > 0) 
+signal(leer);
+else signal(mutex);
+if (nee > 0) signal(escribir);
+else if (nle > 0) 
+signal(leer);
+else signal(mutex);
+}
+}
+}
+Lectores / Escritores
+Inicialización / Memoria Global
+Prioridad Escritores (6/8)
+¿y si mientras se leía aparecieron escritores?
+Proceso Tipo Lector
+while (true) {
+while (true) {
+wait(mutex);
+if ( nee>0 || escribiendo) {
+nle++;
+signal(mutex);
+wait(leer);
+nle--;
+}
+nl++;
+wait(mutex);
+if ( nee>0 || escribiendo) {
+nle++;
+signal(mutex);
+wait(leer);
+nle--;
+}
+nl++;
+if (nle > 0) signal(leer);
+else signal(mutex);
+if (nle > 0) signal(leer);
+else signal(mutex);
+LEER DEL RECURSO
+LEER DEL RECURSO
+wait(mutex); 
+nl--;
+wait(mutex); 
+nl--;
+if (nl == 0 && nee > 0)
+signal(escribir);
+else
+signal(mutex);
+signal(mutex);
+}
+}
+✗
+int nl = 0, nee = 0, nle = 0; 
+boolean escribiendo = false;
+initial(mutex, 1);
+initial(escribir, 0);
+initial(leer, 0); 
+Proceso Tipo Escritor
+while (true) {
+wait(mutex);
+if (nl > 0 || escribiendo) {
+nee++;
+signal(mutex);
+wait(escribir);
+nee--;
+}
+escribiendo = true;
+signal(mutex);
+ESCRIBIR EN EL RECURSO
+wait(mutex);
+escribiendo = false;
+if (nee > 0) signal(escribir);
+else if (nle > 0) 
+signal(leer);
+else signal(mutex);
+}
+while (true) {
+wait(mutex);
+if (nl > 0 || escribiendo) {
+nee++;
+signal(mutex);
+wait(escribir);
+nee--;
+}
+escribiendo = true;
+signal(mutex);
+ESCRIBIR EN EL RECURSO
+wait(mutex);
+escribiendo = false;
+if (nee > 0) signal(escribir);
+else if (nle > 0) 
+signal(leer);
+else signal(mutex);
+}
+Lectores / Escritores
+Inicialización / Memoria Global
+Prioridad Escritores (7/8)
+Problema de inanición lectores
+Proceso Tipo Lector
+while (true) {
+wait(mutex);
+if ( nee>0 || escribiendo) {
+nle++;
+signal(mutex);
+wait(leer);
+nle--;
+}
+nl++;
+if (nle > 0) signal(leer);
+else signal(mutex);
+while (true) {
+wait(mutex);
+if ( nee>0 || escribiendo) {
+nle++;
+signal(mutex);
+wait(leer);
+nle--;
+}
+nl++;
+if (nle > 0) signal(leer);
+else signal(mutex);
+LEER DEL RECURSO
+wait(mutex); 
+nl--;
+LEER DEL RECURSO
+wait(mutex); 
+nl--;
+if (nl == 0 && nee > 0)
+signal(escribir);
+else
+signal(mutex);
+if (nl == 0 && nee > 0)
+signal(escribir);
+else
+signal(mutex);
+}
+}
+int nl = 0, nee = 0, nle = 0; 
+boolean escribiendo = false;
+initial(mutex, 1);
+initial(escribir, 0); 
+initial(leer, 0); 
+Proceso Tipo Escritor
+while (true) {
+wait(mutex);
+if (nl > 0 || escribiendo) {
+nee++;
+signal(mutex);
+wait(escribir);
+nee--;
+}
+escribiendo = true;
+signal(mutex);
+ESCRIBIR EN EL RECURSO
+✗
+}
+wait(mutex);
+escribiendo = false;
+if (nee > 0) signal(escribir);
+else if (nle > 0) 
+signal(leer);
+else signal(mutex);
+while (true) {
+wait(mutex);
+if (nl > 0 || escribiendo) {
+nee++;
+signal(mutex);
+wait(escribir);
+nee--;
+}
+escribiendo = true;
+signal(mutex);
+ESCRIBIR EN EL RECURSO
+wait(mutex);
+escribiendo = false;
+if (nee > 0) signal(escribir);
+else if (nle > 0) 
+signal(leer);
+else signal(mutex);
+}
+Lectores / Escritores
+Inicialización / Memoria Global
+Prioridad Escritores (8/8)
+• Aliviando inanición lectores
+Proceso Tipo Lector
+while (true) {
+wait(mutex);
+if ( nee>0 || escribiendo) {
+nle++;
+signal(mutex);
+wait(leer);
+nle--;
+}
+nl++;
+if (nle > 0) signal(leer);
+else signal(mutex);
+LEER DEL RECURSO
+while (true) {
+wait(mutex);
+if ( nee>0 || escribiendo) {
+nle++;
+signal(mutex);
+wait(leer);
+nle--;
+}
+nl++;
+if (nle > 0) signal(leer);
+else signal(mutex);
+LEER DEL RECURSO
+wait(mutex); 
+nl--;
+if (nl == 0 && nee > 0)
+signal(escribir);
+else
+signal(mutex);
+}
+wait(mutex); 
+nl--;
+if (nl == 0 && nee > 0)
+signal(escribir);
+else
+signal(mutex);
+}
+int nl = 0, nee = 0, nle = 0; 
+boolean escribiendo = false;
+initial(mutex, 1);
+initial(escribir, 0); 
+initial(leer, 0); 
+Proceso Tipo Escritor
+while (true) {
+wait(mutex);
+if (nl > 0 || escribiendo) {
+nee++;
+signal(mutex);
+wait(escribir);
+nee--;
+}
+escribiendo = true;
+signal(mutex);
+ESCRIBIR EN EL RECURSO
+while (true) {
+wait(mutex);
+if (nl > 0 || escribiendo) {
+nee++;
+signal(mutex);
+wait(escribir);
+nee--;
+}
+escribiendo = true;
+signal(mutex);
+ESCRIBIR EN EL RECURSO
+wait(mutex);
+escribiendo = false;
+wait(mutex);
+escribiendo = false;
+if (nee > 0) signal(escribir);
+else if (nle > 0) 
+signal(leer);
+else signal(mutex);
+if (nle > 0) signal(leer);
+else if (nee > 0) 
+signal(escribir);
+else signal(mutex);
+}
+}
+Filósofos
+• Cinco filósofos se dedican a pensar y comer de forma alterna. 
+Para comer usan una mesa con cinco sillas, cinco palillos y 
+cinco platos.
+• Cuando un filósofo decide comer intenta coger sus dos 
+palillos y sólo comerá cuando tenga los dos.
+1
+2
+2
+1
+3 4
+0
+0
+3
+4
+• Procesos que necesitan utilizar varios 
+recursos no compartibles 
+simultáneamente. El número de 
+recursos no es suficiente para 
+abastecer a todos los procesos al 
+mismo tiempo.
+Análisis Filósofos
+• Recursos no compartibles– Recursos:
+• Los palillos– Secciones críticas:
+• Las acciones de coger/dejar los palillos– Exclusión mutua:
+• El código para coger/dejar los palillos.
+• Condiciones de sincronización– Un filósofo no puede sentarse a comer si el que se sienta a su 
+izquierda o el que se sienta a su derecha están comiendo.
+Solución Filósofos 1/4
+• Esquema básico
+• Primera aproximación
+• Primera aproximación– Un semáforo por palillo– Cada filósofo usa dos 
+palillos concretos– Un semáforo por palillo– Cada filósofo usa dos 
+palillos concretos
+Inicialización / Memoria Global
+Inicialización / Memoria Global
+Proceso Filósofo i (Tipo)
+while (true) {
+// Pensar
+// Coger palillos i e i+1
+// Comer
+// Dejar palillos i e i+1
+}
+(incorrecta)
+Proceso Filósofo i
+Proceso Filósofo i
+while (true) {
+// Pensar
+while (true) {
+// Pensar
+wait(palillo[i]);
+wait(palillo[i+1 % 5]);
+wait(palillo[i]);
+wait(palillo[i+1 % 5]);
+for (int i = 0 ; i < 5 ; i++) {
+initial(palillo[i], 1);
+}
+for (int i = 0 ; i < 5 ; i++) {
+initial(palillo[i], 1);
+}
+// Comer
+// Comer
+}
+}
+signal(palillo[i];
+signal(palillo[i+1 % 5]);
+signal(palillo[i];
+signal(palillo[i+1 % 5]);
+Solución Filósofos 2/4
+• Segunda aproximación– Un semáforo por palillo– Cada filósofo usa dos palillos concretos– Limitamos el número de filósofos en la mesa a 4
+Inicialización / Memoria Global
+for (int i = 0 ; i < 5 ; i++) {
+initial(palillo[i], 1);
+}
+initial(sillas, 4);
+Proceso Filósofo i
+while (true) {
+// Pensar
+wait(sillas);
+wait(palillo[i]);
+wait(palillo[i+1 % 5]);
+// Comer
+signal(palillo[i];
+signal(palillo[i+1 % 5]);
+signal(sillas);
+}
+• Tercera aproximación–Un booleano por palillo–Cada filósofo usa dos palillos 
+concretos–Sólo si los dos palillos están 
+libres se sienta el filósofo–Espera ocupada
+Solución Filósofos 3/4
+boolean libre[];
+libre = new boolean[5];
+for (int i = 0 ; i < 5 ; i++) {
+libre[i] = true;
+}
+initial(mutex, 1);
+while (true) {
+// Pensar
+wait(mutex);
+while (!libre[i] || 
+!libre[i+1 % 5]) {
+signal(mutex);
+wait(mutex);
+}
+palillo[i] = false;
+palillo[i+1 % 5] = false;
+signal(mutex);
+// Comer
+wait(mutex);
+palillo[i] = true;
+palillo[i+1 % 5] = true;
+signal(mutex);
+}
+Proceso Filósofo i
+Inicialización / Memoria Global
+Esperar que los dos palillos estén 
+libres
+while(true) {
+// Pensar
+wait(mutex);
+while(!libre[i] || 
+!libre[i+1 % 5]) {
+signal(mutex);
+wait(mutex);
+}
+libre[i] = false;
+libre [i+1 % 5] = false;
+signal(mutex);
+// Comer
+wait(mutex);
+libre [i] = true;
+libre [i+1 % 5] = true;
+signal(mutex);
+}
+• Cuarta aproximación–Un semáforo por palillo–Cada filósofo usa dos 
+palillos concretos–Dos tipos de procesos 
+(asimétricos)
+Solución Filósofos 4/4
+while (true) {
+// Pensar
+wait(palillo[i+1 % 5]);
+wait(palillo[i]);
+// Comer
+signal(palillo[i+1 % 5]);
+signal(palillo[i];
+}
+Proceso Filósofo i (i par)
+while (true) {
+// Pensar
+wait(palillo[i]);
+wait(palillo[i+1 % 5]);
+// Comer
+signal(palillo[i+1 % 5]);
+signal(palillo[i];
+}
+Proceso Filósofo i (i impar)
+for (int i = 0 ; i < 5 ; i++) {
+initial(palillo[i], 1);
+}
+Inicialización / Memoria Global
+Implementación de Semáforos
+TAD Semáforo v1
+Valor es siempre positivo
+¿Qué añadir si fuese binario?
+Wait y Signal deben ser atómicas 
+(ejecutarse en exclusión mutua)
+public class Semaforo {
+private int valor;
+private Cola cola;
+}
+public Semaforo(int v) {
+valor = v;
+cola = new Cola();
+}
+public class Semaforo {
+...
+public void wait() {
+if (valor > 0) {
+valor--;    
+} else {
+Proceso p = procesoActual();
+cola.push(p);
+bloquea(p);     
+}
+}
+public void signal() {
+if (!cola.empty()) {
+Proceso p = cola.pop();
+desbloquea(p);
+} else {
+valor++;
+}
+} 
+}
+Implementación de Semáforos
+TAD Semáforo v2
+Si valornegativo su valor 
+absoluto indica cuantos están 
+esperando
+public class Semaforo {
+private int valor;
+private Cola cola;
+public Semaforo(int v) {
+valor = v;
+cola = new Cola();
+}
+}
+public class Semaforo {
+...
+public void wait() {
+valor--;
+if (valor < 0) {
+Proceso p = procesoActual();
+cola.push(p);
+bloquea(p);     
+}
+}
+public void signal() {
+valor++;
+if (valor <= 0) {
+Proceso p = cola.pop();
+desbloquea(p);
+}
+} 
+}
+Propiedades / Requisitos
+• Ejecución de las 
+operaciones waity 
+signalde forma atómica
+• Exclusión mutua entre 
+operaciones con el 
+mismo semáforo
+PROTOCOLO ENTRADA SECCION CRITICA (Espera Ocupada)// Muy malo, podría durar mucho tiempo
+SECCIÓN CRITICA (del usuario) SOBRE UN RECURSO
+PROTOCOLO SALIDA SECCION CRITICA
+PROTOCOLO ENTRADA SECCION CRITICA a semáforo (Espera Ocupada)// Aceptable, espera breve
+Sección crítica (código del wait);   (si no puede pasar se bloquea)
+PROTOCOLO SALIDA SECCION CRITICA semáforo
+SECCIÓN CRITICA (del usuario) SOBRE UN RECURSO
+PROTOCOLO ENTRADA SECCION CRITICA semáforo (Espera Ocupada )// Aceptable, espera breve
+Sección crítica (código del signal);
+PROTOCOLO SALIDA SECCION CRITICA semáforo
+• Si se implementa la sección crítica del wait/signalcon protocolo de entrada 
+con espera ocupada, en cambio,  es aceptable, ¿por qué?
+• Pues porque esa sección crítica son pocas instrucciones… y a cambio 
+conseguimos implementar semáforos para poder hacer esperas con bloqueo.
+• Sin semáforos, un protocolo de entrada con espera ocupada sería… 
+Inconvenientes de los Semáforos
+• Mecanismo de bajo nivel y no estructurado– (se puede olvidar el signal de algún wait)
+• Norestringe el tipo de operaciones sobre el recurso– Nohaycondiciones en el acceso, el acceso es total.
+• El programador debe incluir todas las sentencias
+que acceden a objetos compartidos en secciones
+críticas– (se puede colar alguna fuera del wait-signal)
+• Se usan las mismas operaciones para implementar
+la exclusión mutua y la condición de sincronización– Noseautoexplica si se usa para mutex o para sincronizar
+• Código desincronización repartido en todos los procesos– Mantenimiento difícil, si se modifica algo se tienen que revisar todos
+los procesos
+
+
+Programación Concurrente y
+Distribuida
+Tema 4. Monitores
+Infografía
+Contexto
+• Sistemas basados en memoria compartida con
+aplicaciones compuestas por procesos que:
+– Acceden a Recursos no compartibles
+– Requieren de Reglas de sincronización
+• Problemas
+– Ejecución simultánea => orden parcial + no atomicidad de
+sentencias de alto nivel => indeterminismo + Recursos no
+compartibles => Programas incorrectos => Resultados
+incorrectos
+• Necesitamos
+– Garantizar Exclusión Mutua
+– Garantizar las Condiciones de Sincronización
+Contexto
+• Soluciones basadas en inhibición de interrupciones
+– Sólo son válidas en monoprocesadores
+• Soluciones basadas en espera ocupada
+– Ineficientes
+• Soluciones basadas en Semáforos
+– Complejas, difíciles de mantener, mecanismo de muy bajo
+nivel, código de sincronización distribuido entre todos los
+procesos, etc.
+• ¿Monitores?
+Definición de Monitor
+• Es un mecanismo de abstracción de datos que
+permite encapsular la representación de recursos no
+compartibles junto con las operaciones de acceso a
+los mismos.
+• Un monitor tiene cinco componentes
+– Nombre
+– Variables privadas (o permanentes)
+– Operaciones o procedimientos (públicos o privados)
+– Cola de espera
+– Código de inicialización
+Ejemplos de
+sintaxis
+monitor Ejemplo {
+// Datos privados del monitor
+private variable;
+// Código de inicialización del monitor
+public Ejemplo() {
+}
+// Procedimientos público del monitor
+public void proc1() {
+variable = ...;
+}
+}
+begin
+ejemplo.proc1();
+end;
+Monitor ejemplo;
+var variable;
+export proc1;
+procedure proc1(parámetros);
+var variables locales;
+begin
+código del procedimiento
+end;
+procedure proc2(parámetros);
+var variables locales;
+begin
+código del procedimiento
+end;
+begin
+código de inicialización
+del monitor
+end;
+{
+// ejemplo es un objeto
+// de tipo Ejemplo
+ejemplo.proc1();
+}
+Propiedades
+• Las variables del monitor son privadas y el acceso a las mismas
+sólo es posible a través del conjunto de procedimientos públicos
+del monitor.
+• El monitor es un objeto compartido (elemento pasivo), sus
+procedimientos son ejecutados por procesos o hilos (elementos
+activos).
+• Ofrece mecanismos de control para la ejecución concurrente de
+los procedimientos del monitor.
+– Proporciona exclusión mutua en el acceso a las variables.
+– Permite implementar condiciones de sincronización.
+• Una vez definido, si es correcto, funcionará igual
+independientemente del número de procesos que lo usen.
+Funcionamiento
+• Uso del monitor
+• Funcionamiento
+– Invocar a un procedimiento implica intentar entrar al
+monitor. Se sale del monitor al terminar el procedimiento o
+al quedar bloqueado
+– Sólo se puede estar ejecutando un procedimiento dentro
+del monitor en cada momento.
+– Gestión automática de una cola FIFO de espera de
+procesos que quieren entrar para ejecutar algún
+procedimiento del monitor mientras éste está en uso.
+La ejecución de los procedimientos del monitor se
+lleva a cabo en exclusión mutua.
+nombre.procedimiento(parámetros)
+• Los procesos van entrando al monitor en el orden en el que
+intenten ejecutar alguno de los procedimientos del mismo.
+Sólo uno estará dentro en cada momento.
+Simulación del funcionamiento
+...
+miMonitor.proc1();
+...
+Eemplo miMonitor =
+new Ejemplo();
+Memoria Global
+P1
+...
+miMonitor.proc1();
+...
+P2
+CPU
+CPU
+CPU
+CPU
+CPU
+CPU
+CPU
+P1 P2P21 P2P1
+miMonitor
+Exclusión Mutua con Monitores
+• Si el recurso está compuesto por una o más
+variables las declararemos dentro del monitor.
+• Si el recurso no es software haremos un monitor que
+ofrezca las operaciones necesarias para utilizar el
+recurso.
+• Si el número de operaciones a ofrecer es demasiado
+alto es mejor usar el monitor para implementar un
+protocolo de entrada y otro de salida que sirva para
+cualquier sección crítica
+(p.e. Si es un caso de EM de acceso único y exclusivo y sin
+prioridad pues básicamente simularemos un Semáforo
+binario)
+Exclusión Mutua con Monitores (ejemplo)
+• Recurso software protegido: variable n
+monitor MutexN {
+private int n;
+public MutexN() {
+n = 0;
+}
+public void incrementa() {
+n = n + 1;
+}
+}
+int i = 0;
+for ( i = 0 ; i < 10 ; i++ ) {
+recurso.incrementa();
+}
+Proceso Pi
+MutexN recurso = new MutexN();
+Memoria Global
+Exclusión Mutua con Monitores
+• Recurso hardware protegido: Pantalla (encapsulándola)
+monitor MutexPantalla {
+// Sin datos
+public MutexPantalla() {
+// Sin inicialización
+}
+public void println(String msg) {
+System.out.println(msg);
+}
+}
+while (true) {
+pantalla.println(“Soy dos”);
+}
+Proceso Dos
+while (true) {
+pantalla.println(“Soy uno”);
+}
+Proceso Uno
+MutexPantalla pantalla =
+new MutexPantalla();
+Memoria Global
+Luego veremos otra manera de proteger
+un recurso hardware usando Protocolo de
+entrada y de salida.
+• Implementación de semáforo binario con un monitor
+Exclusión Mutua con Monitores
+monitor SemaforoBinario {
+private int valor;
+public SemaforoBinario() {
+valor = 1;
+}
+public void wait() {
+if (valor == 0) BloquearProcesoActual();
+else valor = 0;
+}
+public void signal() {
+if (HayBloqueados()) DesbloquearUno();
+else valor = 1;
+}
+} for ( int i = 0 ; i < 10 ; i++ ) {
+mmutex.wait();
+n = n + 1;
+mmutex.signal();
+}
+Proceso Pi
+¿Cómo hacer esto?
+SemaforoBinario mmutex =
+new SemaforoBinario();
+int n = 0;
+Memoria Global
+Condición de Sincronización con
+Monitores
+• Necesitamos bloquear un proceso cuando no se
+cumple una condición.
+• Necesitamos que un proceso activo pueda
+desbloquear a un proceso bloqueado al hacer que
+se cumpla la condición que éste esperaba.
+Dentro de un monitor se pueden declarar y usar variables
+de tipo Condition que permiten gestionar colas FIFO de
+procesos bloqueados
+Operaciones con variables Condition
+• Declaración
+– Variables de tipo Condition.
+– Sólo dentro de un monitor.
+• Usar sólo dentro de los procedimientos del monitor
+mediante las siguientes operaciones:
+– delay(c): Bloquea al proceso que lo ejecuta liberando
+previamente la exclusión mutua del monitor.
+– resume(c): Si hay algún proceso bloqueado en esta
+condición desbloquea uno (FIFO), si no no hace nada.
+– empty(c): Devuelve verdadero si NO hay ningún proceso
+bloqueado en esta cola.
+Exclusión Mutua con Monitores
+• Recurso hardware protegido: Pantalla (con PE/PS)
+monitor MutexPantalla {
+private boolean ocupada;
+private Condition c;
+public MutexPantalla() {
+ocupada=false;
+}
+public void PedirAcceso() {
+if (ocupada) delay(c);
+ocupada=true;
+}
+public void LiberarAcceso(){
+ocupada=false;
+resume(c);
+}
+}
+while (true) {
+pantalla.PedirAcceso();
+System.out.format(“%2$s %1$s”,
+“dos”,”Soy”);
+pantalla.LiberarAcceso();
+}
+Proceso Dos
+while (true) {
+pantalla.PedirAcceso();
+System.out.println(“Soy uno”);
+pantalla.LiberarAcceso();
+}
+Proceso Uno
+MutexPantalla pantalla =
+new MutexPantalla();
+Memoria Global
+Sincronización con monitores
+• Los procesos se comunican/sincronizan a través de
+los datos protegidos por el monitor.
+• Una variable Condition por condición lógica.
+• Las distintas condiciones serán relativas a los datos
+privados del monitor o el estado del recurso
+representado para garantizar el acceso en exclusión
+mutua.
+• Los distintos procesos ejecutan procedimientos del
+monitor, procedimientos en los que podrán quedar
+bloqueados o desbloquear a otros procesos.
+NUNCA USAR DELAY DE FORMA INCONDICIONAL
+Sincronización con monitores
+monitor Sincro {
+private boolean escrito;
+private Condition c;
+public Sincro() {
+escrito = false;
+}
+public void esperar() {
+if (!escrito) delay(c);
+}
+public void informar() {
+escrito = true;
+resume(c);
+}
+}
+Sincro.esperar();
+System.out.println(“Mundo”);
+Proceso Mundo
+System.out.println(“Hola”);
+sincro.informar();
+Proceso Hola
+Sincro sincro = new Sincro();
+Memoria Global
+El problema de resume
+Monitor C1 C2
+...
+monitor.proc1();
+...
+P1
+...
+monitor.proc2();
+...
+P2
+monitor Ejemplo{
+private Condition c1;
+private Condition c2;
+public void proc1() {
+delay(c1);
+// resto
+}
+public void proc2() {
+resume(c1);
+// resto
+}
+}
+P1
+CPU
+P2
+CPU
+CPU
+CPU
+P1
+P2
+¿Dos procesos pueden ejecutar código del
+monitor simultáneamente?
+“Durmiendo”
+Bloqueado
+en espera
+Activo
+delay(c1); // MALA IDEA
+Soluciones al problema de resume
+• Desbloquear y Salir
+– El que desbloquea cede la exclusión mutua del
+monitor al desbloqueado
+• Desbloquear y retorno forzado
+• Desbloquear y esperar
+• Desbloquear y espera urgente
+• Desbloquear y Continuar
+– El desbloqueado se ejecutará después de que el
+desbloqueador salga del monitor
+La cola de cortesía
+• Solución de tipo desbloquear y salir.
+• Una solución al problema anterior es
+usar una cola secundaria de cortesía
+donde bloquear a los procesos que
+ejecuten resume.
+• Los procesos de esta cola tendrán
+prioridad a la hora de entrar al monitor.
+C1 C2
+monitor
+Cola de Cortesía
+resume(c1); resume(c1);
+P1
+P2
+delay(c1
+P1
+);
+P2
+P3 P2 P3
+P1
+(Desbloqueo y espera urgente)
+Activo
+“Durmiendo”
+Bloqueado
+en espera
+Exclusión Mutua con Monitores
+• Implementación de semáforo binario con monitor
+monitor SemaforoBinario {
+private int valor;
+private Condition cola;
+public SemaforoBinario() {
+valor = 1;
+}
+public void wait() {
+if (valor == 0) delay(cola);
+else valor = 0;
+}
+public void signal() {
+if (!empty(cola)) resume(cola);
+else valor = 1;
+}
+}
+for ( int i = 0 ; i < 10 ; i++ ) {
+mmutex.wait();
+n = n + 1;
+mmutex.signal();
+}
+Proceso Pi
+SemaforoBinario mmutex =
+new SemaforoBinario();
+int n = 0;
+Memoria Global
+La llamada a:
+empty(cola),
+es necesaria
+Problemas Clásicos
+• Productor/Consumidor
+• Lectores y Escritores
+• Cena de los Filósofos
+Productores / Consumidores
+• Procesos que generan información (productores) que es
+utilizada por otros procesos (consumidores).
+• Posible diferencia de velocidad de ejecución requiere usar un
+buffer compartido (cola) para desacoplar velocidades.
+• Necesidad de acceder en exclusión mutua al buffer.
+• El código de inserción y de extracción de elementos en la
+cola pasa a ser una Sección Crítica.
+…
+productor productor
+productor
+consumidor
+consumidor
+consumidor
+Productor / Consumidor
+Esquema básico
+while (true) {
+// Producir elemento
+Elemento e = new Elemento();
+// Insertar elemento
+}
+while (true) {
+// Extraer elemento
+Elemento e = ...
+// Consumir elemento
+e.usa();
+}
+Proceso Productor Proceso Consumidor
+Análisis Productor/Consumidor
+• Recursos no
+compartibles
+– Cola
+– Se insertan y se extraen
+elementos
+• Condiciones de
+sincronización
+– Sólo se inserta si hay
+espacio
+– Sólo se extrae si hay
+elementos
+• Cola será una variable definida
+dentro de un monitor
+• Habrá dos procedimientos:
+insertar y extraer
+• Dos variables Condition, una
+para cada condición lógica:
+– nolleno
+– novacio
+monitor Buffer {
+private Cola cola;
+public Buffer(int n) {
+cola = new Cola(n);
+}
+public void inserta(Elemento e) {
+// Si no hay sitio bloquearme
+cola.push(e);
+// Desbloquear a un consumidor
+}
+public Elemento extrae() {
+// Si no hay elementos bloquearme
+Elemento e = cola.pop();
+// Desbloquear a un productor
+return e;
+}
+}
+Productores/Consumidores
+monitor Buffer {
+private Cola cola;
+private Condition novacio;
+private Condition nolleno;
+public Buffer(int n) {
+cola = new Cola(n);
+}
+public void inserta(Elemento e) {
+if (cola.llena()) delay(nolleno);
+cola.push(e);
+resume(novacio);
+}
+public Elemento extrae() {
+if (cola.vacia()) delay(novacio);
+Elemento e = cola.pop();
+resume(nolleno);
+return e;
+}
+}
+while (true) {
+// Extraer elemento
+Elemento e = buffer.extrae();
+// Consumir elemento
+e.usa();
+}
+Proceso Consumidor
+while (true) {
+// Producir elemento
+Elemento e = new Elemento();
+// Insertar elemento
+buffer.inserta(e);
+}
+Proceso Productor
+Buffer buffer = new Buffer(5);
+Memoria Global
+Lectores / Escritores
+• Procesos que acceden a un recurso en modo lectura
+(lectores) y procesos que acceden en modo escritura al
+mismo recurso (escritores).
+• Prioridad lectores: ningún lector debe
+esperar salvo que un escritor esté
+escribiendo. Un lector no espera por el
+simple hecho de que haya un escritor
+esperando.
+• Prioridad escritores: cuando un escritor
+espera, debe escribir lo antes posible. Es
+decir, ningún nuevo lector debe iniciar su
+lectura si hay algún escritor esperando.
+Recurso:
+Lector Lector Lector
+Escritor Escritor
+BBDD
+WEB
+Disco Duro
+Lectores / Escritores
+Esquema básico
+while (true) {
+// Protocolo Entrada Lector
+LEER DEL RECURSO
+// Protocolo Salida Lector
+}
+while (true) {
+//Protocolo entrada Escritor
+ESCRIBIR EN EL RECURSO
+// Protocolo salida Escritor
+}
+Proceso Tipo Lector Proceso Tipo Escritor
+Recurso recurso;
+Memoria Global
+Análisis Prioridad Lectores
+• Recursos no compartibles
+– nl, escribiendo
+– Recurso (sólo a veces)
+• Condiciones de
+sincronización
+– Sólo se lee si no se está
+escribiendo
+– Sólo se escribe si no se
+está escribiendo ni leyendo
+• nl y escribiendo variables del
+monitor
+• El recurso no puede estar
+dentro del monitor (o solo
+podría leer uno a la vez)
+• Habrá dos procedimientos para
+cada tipo de proceso.
+Protocolos de entrada y salida.
+• Dos variables Condition, una
+para cada condición:
+– leer
+– escribir
+Lectores/Escritores
+prioridad lectores v2.0 monitor Acceso {
+private int nl;
+private boolean escribiendo;
+private Condition escribir;
+private Condition leer;
+public Acceso() {
+nl = 0;
+escribiendo = false;
+}
+...
+}
+public void abrir_lectura() {
+if (escribiendo) delay(leer);
+nl++;
+resume(leer);
+}
+public void cerrar_lectura() {
+nl--;
+if (nl==0) resume(escribir);
+}
+public void abrir_escritura() {
+if (escribiendo || nl > 0)
+delay(escribir);
+escribiendo = true;
+}
+public void cerrar_escritura() {
+escribiendo = false;
+if (!empty(leer))
+resume(leer);
+else
+resume(escribir);
+}
+Lectores / Escritores
+Esquema básico
+while (true) {
+// Protocolo Entrada Lector
+acceso.abrir_lectura();
+LEER DEL RECURSO
+// Protocolo Salida Lector
+acceso.cerrar_lectura();
+}
+while (true) {
+//Protocolo entrada Escritor
+acceso.abrir_escritura();
+ESCRIBIR EN EL RECURSO
+// Protocolo salida Escritor
+acceso.cerrar_escritura();
+}
+Proceso Tipo Lector Proceso Tipo Escritor
+Recurso recurso;
+Acceso acceso;
+Memoria Global
+Análisis Prioridad Escritores
+• Recursos no compartibles
+– nl, nle, nee, escribiendo
+– Recurso (sólo a veces)
+• Condiciones de
+sincronización
+– Sólo se lee si no se está
+escribiendo ni hay escritores
+esperando
+– Sólo se escribe si no se está
+escribiendo ni leyendo
+• nl, nle, nee y escribiendo
+variables del monitor
+• El recurso no puede estar
+dentro del monitor
+• Habrá dos procedimientos para
+cada tipo de proceso.
+Protocolos de entrada y salida.
+• Dos variables Condition, una
+para cada condición:
+– leer
+– escribir
+Lectores/Escritores
+prioridad escritores (v1.0)
+monitor Acceso {
+private int nl, nee, nle;
+private boolean escribiendo;
+private Condition escribir;
+private Condition leer;
+public Acceso() {
+nl = 0; nle = 0; nee = 0;
+escribiendo = false;
+}
+...
+public void abrir_lectura() {
+if (escribiendo || nee > 0) {
+nle++;
+delay(leer);
+nle--;
+}
+nl++;
+resume(leer);
+}
+public void cerrar_lectura() {
+nl--;
+if (nl==0) resume(escribir);
+}
+public void abrir_escritura() {
+if (escribiendo || nl > 0) {
+nee++;
+delay(escribir);
+nee--;
+}
+escribiendo = true;
+}
+public void cerrar_escritura() {
+escribiendo = false;
+if (!empty(escribir))
+resume(escribir);
+else
+resume(leer);
+}
+Lectores/Escritores
+prioridad escritores (v2.0)
+monitor Acceso {
+private int nl;
+private boolean escribiendo;
+private Condition escribir;
+private Condition leer;
+public Acceso() {
+nl = 0;
+escribiendo = false;
+}
+...
+public void abrir_lectura() {
+if (escribiendo ||
+!empty(escribir)) {
+delay(leer);
+}
+nl++;
+resume(leer);
+}
+public void cerrar_lectura() {
+nl--;
+if (nl==0) resume(escribir);
+}
+public void abrir_escritura() {
+if (escribiendo || nl > 0) {
+delay(escribir);
+}
+escribiendo = true;
+}
+public void cerrar_escritura() {
+escribiendo = false;
+if (!empty(escribir))
+resume(escribir);
+else
+resume(leer);
+}
+Filósofos
+• Cinco filósofos se dedican a pensar y comer de forma alterna.
+Para comer usan una mesa con cinco sillas, cinco palillos y
+cinco platos.
+• Cuando un filósofo decide comer intenta coger sus dos
+palillos y sólo comerá cuando tenga los dos.
+• Procesos que necesitan utilizar varios
+recursos no compartibles
+simultáneamente. El número de
+recursos no es suficiente para
+abastecer a todos los procesos al
+mismo tiempo.
+1 0
+2
+3
+4
+0
+1
+2
+3 4
+Análisis Filósofos
+• Recursos no compartibles
+– palillos o asientos
+• Condiciones de
+sincronización
+– Filósofo i sólo come si sus
+dos palillos están libres
+– Dejar de comer implica la
+posible liberación de dos
+filósofos distintos i-1 e i+1
+• estado de los palillos o de los
+filósofos como variables del
+monitor
+• Habrá dos procedimientos uno
+para sentarse y otro para
+levantarse.
+• Una variable Condition por
+filósofo
+– esperando[i]
+Filósofos
+Esquema básico
+while (true) {
+// PENSAR
+mesa.sentarse(i);
+// COMER
+mesa.levantarse(i);
+}
+Proceso Tipo Filósofo i
+Mesa mesa;
+Memoria Global
+monitor Mesa {
+private Condition esperando[N];
+private String estado[N];
+public Mesa() {
+for ( int i = 0 ; i < N ; i++ ) estado[i] = “pensando”;
+}
+public void sentarse(int filosofo) {
+estado[filosofo] = “hambriento”;
+if (!puede_comer(filosofo)) delay(esperando[filosofo]);
+estado[filosofo] = “comiendo”;
+}
+public void levantarse(int filosofo) {
+estado[filosofo] = “pensando”;
+int siguiente = (filosofo+1) % N;
+int anterior = (filosofo+N-1) % N;
+if (puede_comer(siguiente)) resume(esperando[siguiente]);
+if (puede_comer(anterior)) resume(esperando[anterior]);
+}
+...
+}
+Comida de Filósofos
+Método puede_comer
+monitor Mesa {
+...
+private boolean puede_comer(int filosofo) {
+int siguiente = (filosofo+1) % N;
+int anterior = (filosofo+N-1) % N;
+if ((estado[anterior] != “comiendo”) &&
+(estado[siguiente] != “comiendo”) &&
+(estado[filosofo] == “hambriento”)) {
+return true;
+} else {
+return false;
+}
+}
+}
+Tipos de resume
+• Desbloquear y Retorno Forzado (DR)
+– Tras desbloquear se realiza un return.
+• Desbloquear y Esperar (DE)
+– Tras desbloquear se bloquea al proceso actual en la cola de entrada al
+monitor. Se cede la exclusión mutua al desbloqueado.
+• Desbloquear y Esperar con Urgencia (DU)
+– Tras desbloquear se bloquea al proceso en una cola especial con
+prioridad sobre la de entrada al monitor.
+• Desbloquear y continuar (DC)
+– El proceso desbloqueado podrá ejecutarse inmediatamente después
+de que el proceso actual salga del monitor (pero no sabemos cuándo
+lo hará).
+Diferencias según el
+tipo de resume
+monitor Test{
+Condition c1, c2;
+public void a() {
+delay(c1);
+}
+public void b() {
+delay(c2);
+resume(c1);
+resume(c1);
+}
+public void c() {
+resume(c2);
+}
+}
+test.a(); test.b();
+test.c(); test.c();
+P1 P2
+P3 P4
+P1 DEL(C1)
+P2 DEL(C2)
+P3 RES(C2)
+P2 RES(C1)
+P1 END
+P3 END
+P2 RES(C1)
+P2 END
+P4 RES(C2)
+P4 END
+DU
+P1 DEL(C1)
+P2 DEL(C2)
+P3 RES(C2)
+P3 END
+P2 RES(C1)
+P2 RES(C1)
+P2 END
+P1 END
+P4 RES(C2)
+P4 END
+DC
+P1 DEL(C1)
+P2 DEL(C2)
+P3 RES(C2)
+P3 END
+P2 RES(C1)
+P2 END
+P1 END
+P4 RES(C2)
+P4 END
+DR
+P1 DEL(C1)
+P2 DEL(C2)
+P3 RES(C2)
+P2 RES(C1)
+P1 END
+P4 RES(C2)
+P4 END
+P3 END
+P2 RES(C1)
+P2 END
+DE
+Cola Entrada: P1, P2, P3, P4.
+C1:
+C2:
+Cola Cortesía:
+Dentro Monitor:
+Llamadas anidadas (¡Cuidado!)
+monitor A {
+public void metodo1() {
+b.metodo2();
+}
+public void metodo3() {
+...
+}
+}
+monitor B {
+private Condition c;
+public void metodo2() {
+if (...) delay(c);
+}
+public void metodo4() {
+resume(c);
+}
+}
+while (true) {
+a.metodo1();
+}
+Proceso Tipo 1
+A a = new A();
+B b = new B();
+Memoria Global
+while (true) {
+a.metodo3();
+b.metodo4();
+}
+Proceso Tipo 2
+
+
+
+Programación Concurrente y 
+Distribuida
+Temas 5, 6 y 7. Paso de 
+mensajes
+Infografía
+Contexto
+• Sistemas distribuidos:– No hay una memoria central compartida por todos– Procesos totalmente independientes
+• Problemas– Comunicación– Sincronización– Exclusión mutua (recursos externos no compartibles)
+• Necesitamos– Un mecanismo para intercomunicar procesos– Garantizar Exclusión Mutua– Garantizar las Condiciones de Sincronización
+Paso de mensajes
+• Conjunto de primitivas que permiten enviar y recibir 
+mensajes a los procesos:– send(destino, mensaje);– receive(origen, mensaje);
+Se ejecutan siempre de forma 
+atómica y en exclusión mutua
+• Es posible utilizar el paso de mensajes en sistemas 
+basados en memoria compartida
+• Los diferentes mecanismos basados en paso de 
+mensaje se distinguen por sus propiedades:– Direccionamiento o Identificación– Capacidad y flujo del canal– Sincronización temporal
+Direccionamiento
+• Directo– Emisor y receptor indican explícitamente a quien van 
+dirigidos los mensajes o de quien pretenden recibirlos
+al realizar las operaciones de envío y recepción
+• send(id-proceso-destino, mensaje);
+• receive(id-proceso-origen, mensaje);  
+• Indirecto– Se utiliza una estructura de datos intermedia (Buzón, 
+Channel) para almacenar los mensajes enviados
+hasta que sean recogidos por otros procesos.
+• send(id-buzon, mensaje);
+• receive(id-buzón, mensaje);
+Direccionamiento Directo
+(directo simétrico)
+O (Origen)
+send(D, message);
+D (Destino)
+receive(O, message);
+O
+Uno a uno
+D
+• Esta alternativa es segura y rápida pero demasiado rígida al quedar 
+predeterminado en el código el identificador de los procesos.
+• No es adecuada para cliente-servidor.
+• Un solo canal posible entre dos procesos.
+Direccionamiento Directo
+(directo asimétrico)
+• Emisor conoce identificador del receptor
+• Receptor recibe de cualquiera y es informado 
+del identificador del emisor
+Oi (Origen)
+send(D, message);
+D (Destino)
+receive(¿O?, message);
+O1
+…
+ON
+D
+Muchos a uno
+Direccionamiento Indirecto
+O1
+O1
+D2
+…
+ON
+D1
+Uno a uno (Channel) Muchos a uno (Puerto)
+D1
+O1
+…
+DN
+O1
+…
+ON
+D1
+…
+DN
+Muchos a Muchos (Buzón)
+Uno a Muchos (Buzón)
+Capacidad y flujo del canal
+• Los mensajes son transportados por un canal 
+de comunicación desde su origen hasta su
+destino
+• Capacidad: ¿Cuántos mensajes es capaz de 
+almacenar temporalmente el canal?– Capacidad nula– Capacidad limitada
+• Flujo: ¿Se pueden enviar mensajes en los dos 
+sentidos?– Flujo unidireccional– Flujo bidireccional
+Sincronización temporal
+• Las operacionessendy receivepuedenno 
+ejecutarseal mismotiempo.
+• Para recibir algo primero se debe haber enviado.
+• El receptor puedeno estarlistocuandose envía
+•sendy receivepuedenser, o no ser, bloqueantes.
+Esquema Asíncrono Esquema Síncrono
+(Rendezvous)
+sendbloqueante ✓
+sendNO bloqueante ✓
+receivebloqueante ✓ ✓
+receiveNO bloqueante
+Esquema Asíncrono 1/2
+O (Origen)
+// Sentencias
+send(D, message);
+// Más sentencias
+O
+D
+D (Destino)
+// Sentencias
+receive(O, message);
+// Más sentencias
+Tiempo
+• El emisor no se bloquea y el receptor tampoco porque el 
+mensaje ya está enviado
+Esquema Asíncrono 2/2
+O (Origen)
+// Sentencias
+send(D, message);
+// Más sentencias
+O
+D
+D (Destino)
+// Sentencias
+receive(O, message);
+// Más sentencias
+BLOQUEO
+Tiempo
+• El emisor no se bloquea pero el receptor sí porque aún 
+no hay mensaje
+Esquema Síncrono 1/2
+O (Origen)
+// Sentencias
+send(D, message);
+// Más sentencias
+O
+D
+D (Destino)
+// Sentencias
+receive(O, message);
+// Más sentencias
+BLOQUEO
+Rendezvous
+Tiempo
+• El emisor se bloquea pero el receptor no porque el 
+emisor ya estaba listo. Se esperan mutuamente.
+Esquema Síncrono 2/2
+O (Origen)
+// Sentencias
+send(D, message);
+// Más sentencias
+O
+D
+D (Destino)
+// Sentencias
+receive(O, message);
+// Más sentencias
+Rendezvous
+BLOQUEO
+Tiempo
+• El emisor no se bloquea pero el receptor sí porque el 
+emisor aún no estaba listo. Se esperan mutuamente.
+Esquemas más utilizados
+• Síncrono con canales– Direccionamiento: Indirecto (Channel)– Capacidad: nula– Flujo: bidireccional– Sincronización temporal: send y receive bloqueantes 
+• Asíncrono con buzones– Direccionamiento: Indirecto (Buzones)– Capacidad: finita (predeterminada en la creación)– Flujo: unidireccional– Sincronización temporal: receive bloqueante y send
+no bloqueante (a no ser que se llene el buzón)
+Condiciones de error
+• Enlos diferentes esquemas de comunicación
+basados en paso de mensajes que usemos
+consideraremos que los mensajes llegan
+siempre correctamente, en orden, sin error, y en
+un tiempo finito.
+• Esdecir, que no tendremos en cuenta errores
+del mecanismo de comunicación.
+Espera Selectiva
+• Supongamos que queremos que un proceso sumador 
+indique a otro servidor cuándo quiere que se sume 1 a una 
+variable propia del servidor. Al mismo tempo, un proceso 
+restador hace lo propio.
+• Usando un esquema de comunicación asíncrono y dos 
+buzones llamados suma y resta… 
+Sumador
+while (true) {
+send(suma, 1);
+sleep(5);
+}
+Restador
+while (true) {
+send(resta, 1);
+}
+Servidor
+int total = 0;
+while (true) {
+int aux;
+receive(suma, aux);
+total += aux;
+receive(resta,aux);
+total -= aux;
+}
+• Esto genera acoplamiento, y hace una resta por cada suma
+Espera Selectiva
+• Para evitar el acoplamiento que se produce al forzar el orden en 
+que se intenta recibir mensajes se usa la espera selectiva.
+• Si hay envío bloqueante también se usan envíos.
+• MUY IMPORTANTE: la primera sentencia es un paso de mensajes 
+bloqueante (send(), si es canal, o receive())
+select {
+sentencia de paso de mensajes bloqueante;
+más sentencias;
+or
+sentencia de paso de mensaje bloqueante;
+más sentencias;
+or
+...
+or
+sentencia de paso de mensaje bloqueante;
+más sentencias;
+}
+Solución con Espera Selectiva
+• El servidor no impone un orden concreto.
+• Se hacen todas las que le lleguen.
+Sumador
+while (true) {
+send(suma, 1);
+sleep(5);
+}
+Restador
+while (true) {
+send(resta, 1);
+}
+Servidor
+int total = 0;
+while (true) {
+int aux;
+select {
+receive(suma, aux);
+total += aux;
+or
+receive(resta,aux);
+total -= aux;
+}
+}
+Espera Selectiva con guardas
+• Una guardaes una expresión booleana (local) cuyo valor 
+en el momento de ejecutarse el selectcondiciona la toma 
+en consideración de la alternativa (la abre).
+• Cuidado con el interbloqueo si todas las condiciones son 
+falsas select{
+whencondicion1 =>
+sentencia de paso de mensajes bloqueante;
+sentencias;
+or
+whencondicion2 =>
+sentencia de paso de mensajes bloqueante;
+sentencias;
+or
+...
+or
+whencondicionN =>
+sentencia de paso de mensajes bloqueante;
+sentencias;
+}
+Espera Selectiva con guardas
+¿Podría ponerse lo siguiente? 
+when total > aux =>
+Sumador
+while (true) {
+send(suma, 1);
+sleep(5);
+}
+Restador
+while (true) {
+send(resta, 1);
+}
+Servidor
+int total = 0;
+while (true) {
+int aux;
+select {
+receive(suma, aux);
+total += aux;
+or
+when total > 0 =>
+}
+}
+receive(resta,aux);
+total -= aux;
+• No se puede usar en la guarda un valor a recibir en la 
+primitiva receive(). (No puede verse el interior sin cogerlo)
+Espera Selectiva
+• Funcionamiento:
+1. Se evalúan todas las guardas y nos quedamos sólo 
+con las alternativas cuya guarda sea cierta (abiertas). 
+Si todas son falsas se produce un error.
+2. Del subconjunto anterior nos quedamos sólo con 
+aquellas alternativas cuya sentencia de paso de 
+mensajes no se bloquearía de llevarse a cabo en el 
+momento actual (hay mensaje recibido).
+a) Del subconjunto anterior elegimos de forma aleatoria una y 
+se ejecuta. 
+3. Si no queda ninguna alternativa (no había mensajes) 
+el select se bloquea hasta que alguna alternativa 
+pueda ejectuarse.
+Espera Selectiva con timeout
+• Sólo se permanece bloqueado un máximo de N 
+segundos tras lo cual se ejecutan las sentencias 
+de la alternativa timeout.
+select{
+whencondicion =>
+sentencia de paso de mensajes bloqueante;
+sentencias;
+or
+sentencia de paso de mensajes bloqueante;
+sentencias;
+or
+...
+ortimeoutN
+sentencias;
+}
+Espera Selectiva con Else
+• Si ninguna alternativa de las abiertas puede 
+llevarse a cabo sin producir un bloqueo se 
+ejecutan las sentencias de la alternativa else.
+• Cuidado con convertir la espera selectiva en una “espera ocupada”, 
+a través de un bucle y un selectcon else.
+select{
+whencondicion =>
+sentencia de paso de mensajes bloqueante;
+sentencias;
+or
+sentencia de paso de mensajes bloqueante;
+sentencias;
+or
+...
+else
+sentencias;
+}
+Espera Selectiva con Prioridad
+• La elección de alternativas deja de ser aleatoria, 
+se elige la primera siguiendo el orden de 
+aparición.
+pri select{
+whencondicion =>
+sentencia de paso de mensajes bloqueante;
+sentencias;
+or
+sentencia de paso de mensajes bloqueante;
+sentencias;
+or
+...
+}
+El problema de la Exclusión Mutua 
+en la memoria compartida
+• Al no existir una memoria compartida no hay 
+necesidad de garantizar la exclusión mutua 
+al acceder a las variables.
+• ¿Qué pasa con los recursos hardware o 
+software centralizados?
+• Ejemplo de problema: Garantizar el acceso en 
+exclusión mutua a un fichero cuando N 
+procesos quieren utilizarlo.
+• La exclusión mutua, en sistemas distribuidos, se 
+aplica a recursos hardware o software 
+centralizados.
+Solución con paso de mensajes asíncrono
+Paso 1
+receive(buzon, permiso)
+P1
+P5
+P2
+Paso 2
+Uso fichero
+P1
+P5
+P4
+P3
+P4
+Pi
+P3
+while (true) {
+receive(buzon, permiso);
+// Sección Crítica
+send(buzon, permiso);
+}
+Paso 3
+send(buzon, permiso)
+P1
+P2
+P5
+P2
+P4
+P3
+Solución 1 con paso de mensajes síncrono
+int valor = 1;
+while (true) {
+select {
+when valor > 0 =>
+receive(solicita[1], key);
+valor = 0;
+or
+receive(libera[1], key);
+valor = 1;
+or
+...
+or
+when valor > 0 =>
+receive(solicita[N], key);
+valor = 0;
+or
+receive(libera[N], key);
+valor = 1;
+}
+}
+S
+licita[1]
+P1
+so
+libera[1]
+…
+…
+licita[N]
+PN
+so
+libera[N]
+Pi
+S
+while (true) {
+send(solicita[i], key);
+// Sección Crítica
+send(libera[i], key);
+}
+Solución 2 con paso de mensajes síncrono
+licita[1]
+P1
+so
+S
+while (true) {
+select {
+receive(solicita[1], null);
+send(libera[1], null);
+or
+receive(solicita[2], null);
+send(libera[2], null);
+or
+...
+or
+receive(solicita[N], null);
+send(libera[N], null);
+}
+}
+libera[1]
+…
+…
+licita[N]
+PN
+so
+libera[N]
+Pi
+S
+while (true) {
+send(solicita[i], null);
+// Sección Crítica
+receive(libera[i], null);
+}
+Simulación de Channel con Buzones
+• En Asíncronos el send() es no bloqueante.
+• Para simular un envío bloqueante es necesario 
+un protocolo de dos fases con mensaje de 
+confirmación a un buzón de respuesta por 
+proceso.
+send(solitud, msg);
+receive(respuesta, ok);
+solicitud
+O
+respuesta
+D
+Problemas Clásicos
+• Productor/Consumidor
+• Lectores y Escritores
+• Cena de los Filósofos
+Productores / Consumidores
+• Procesos que generan información (productores) que es 
+utilizada por otros procesos (consumidores).
+• Posible diferencia de velocidad de ejecución requiere 
+algún tipo de buffer para desacoplar velocidades.
+• Necesidad de acceder en exclusión mutua al buffer.
+productor
+…
+productor
+productor
+consumidor
+consumidor
+consumidor
+• Fijaos que no hay memoria compartida, luego el buffer 
+no está en “memoria”.
+Análisis Buffer Limitado (Asíncronos)
+• Recursos no 
+compartibles– Cola– Se insertan y se 
+extraen elementos
+• Condiciones de 
+sincronización– Sólo se inserta si hay 
+espacio– Sólo se extrae si hay 
+elementos
+• La cola será un Buzón
+• La inserción equivale al 
+envío de un mensaje (con el 
+elemento dentro) al Buzón
+• La extracción equivale a la 
+recepción de un mensaje del 
+Buzón.
+• Mientras haya espacio en el 
+Buzón, el envío no es 
+bloqueante
+• Si no hay elementos no se 
+puede recibir y el 
+consumidor queda 
+bloqueado
+Productores/Consumidores 
+(Asíncrono)
+PN
+P1
+…
+CM
+C1
+…
+while (true) {
+// Extraer
+receive(buffer, e);
+// Consumir
+e.usa();
+}
+Ci
+while (true) {
+// Producir
+Elemento e = new Elemento();
+// Insertar 
+send(buffer, e);
+}
+Pi
+MailBoxbuffer = new MailBox(N);
+buffer
+Análisis Buffer Limitado v2.0 (Asíncronos)
+• Recursos no 
+compartibles– Cola de tamaño fijo y 
+preestablecido– Se insertan y se 
+extraen elementos
+• Cola será una variable en un 
+proceso servidor
+• Para insertar enviamos el 
+elemento al Servidor
+• Para extraer le pedimos al 
+Servidor que nos envíe el 
+elemento.
+• Condiciones de 
+sincronización– Sólo se inserta si hay 
+espacio– Sólo se extrae si hay 
+elementos
+• Como el send no es bloqueante 
+es necesario confirmar su 
+recepción antes de enviar otro 
+elemento.
+• Si no hay hueco no se pueden 
+recibir inserciones.
+• Si no hay elementos no se 
+admiten peticiones de extracción.
+Productores/Consumidores v2.0 
+(Asíncrono)
+br
+P1
+…
+br
+S
+C1
+PN
+insertar
+extraer
+…
+CM
+br
+Pi
+MailBox br = new Buzon();
+while (true) {
+// Producir
+Elemento e = new Elemento();
+// Insertar 
+send(insertar, msg(e, br));
+receive(br, ok);
+}
+br
+Ci
+MailBox br = new Buzon();
+while (true) {
+// Extraer
+send(extraer, msg(br));
+receive(br, e);
+// Consumir
+e.usa();
+}
+Productores/Consumidores v2.0
+(Asíncrono)
+Cola cola = new Cola(T);
+while (true) {
+select {
+when !cola.llena() =>
+receive(insertar, msg(e, br));
+cola.push(e);
+send(br, ok);
+or
+when !cola.vacia() =>
+receive(extraer, br);
+send(br, cola.pop());
+}
+}
+S
+Análisis Buffer Limitado (Síncronos)
+• Recursos no 
+compartibles– Cola de tamaño T– Se insertan y se 
+extraen elementos
+• Condiciones de 
+sincronización– Sólo se inserta si hay 
+espacio– Sólo se extrae si hay 
+elementos
+• Cola será una variable de un 
+proceso controlador
+• La inserción equivale al 
+envío de un mensaje (con el 
+elemento dentro) al 
+Controlador
+• La extracción equivale a la 
+recepción de un mensaje del 
+Controlador.
+• El Controlador tendrá que 
+decidir cuando admitir 
+inserciones y cuando 
+generar mensajes hacia los 
+consumidores
+Productores/Consumidores 
+(Síncrono)
+P1
+inserta[1]
+…
+extrae[1]
+S
+C1
+…
+…
+PN
+inserta[N]
+Pi
+while (true) {
+// Producir
+Elemento e = new Elemento();
+// Insertar 
+send(inserta[i], e);
+}
+…
+extrae[M]
+CM
+Ci
+while (true) {
+// Extraer
+receive(extrae[i], e);
+// Consumir
+e.usa();
+}
+S
+Productores/
+Consumidores 
+(Síncrono)
+Cola cola = new Cola(T);
+while (true) {
+select {
+when !cola.llena() =>
+receive(inserta[1], e);
+cola.push(e);
+or
+...
+or
+when !cola.llena() =>
+receive(inserta[N], e);
+cola.push(e);
+or
+when !cola.vacia() =>
+send(extrae[1], cola.pop());
+or
+...
+or    
+when !cola.vacia() =>
+send(extrae[M], cola.pop());
+}
+}
+Lectores / Escritores
+• Procesos que acceden a un recurso en modo lectura 
+(lectores) y procesos que acceden en modo escritura al 
+mismo recurso (escritores).
+Escritor
+Escritor
+Lector
+Lector
+Lector
+Recurso:
+BBDD
+WEB
+Disco Duro
+• Prioridad lectores: ningún lector debe 
+esperar salvo que un escritor esté 
+escribiendo. Un lector no espera por el 
+simple hecho de que haya un escritor 
+esperando.
+• Prioridad escritores: cuando un 
+escritor espera, debe escribir lo antes 
+posible. Es decir, ningún nuevo lector 
+debe iniciar su lectura si hay algún 
+escritor esperando.
+Análisis L/E prioridad L (Asíncronos)
+• Recursos no 
+compartibles– nl y escribiendo– RECURSO sólo a 
+veces
+• Condiciones de 
+sincronización– leer si !escribiendo– escribir si !escribiendo 
+y nl==0
+• Necesitamos mantener el valor de 
+nl y escribiendo en un proceso 
+controlador
+• El controlador recibirá peticiones 
+de lectura o escritura desde los 
+distintos procesos (dos buzones)
+• Cada proceso deberá bloquearse 
+hasta que le concedan permiso (un 
+buzón por proceso)
+• Finalmente habrá que informar al 
+controlador de la liberación del 
+recurso (otro buzón)
+Lectores/Escritores prioridad Lectores
+(Asíncrono)
+S
+abrir_lectura
+Li
+abrir_escritura
+Ei
+Lector i
+cerrar
+MailBox bRes = new MailBox();
+while (true) {
+send(abrir_lectura, bRes);
+receive(bRes, ok);
+// Leer
+}
+Escritor i
+MailBox bRes = new MailBox();
+while (true) {
+send(abrir_escritura, bRes);
+receive(bRes, ok);
+// Escribir
+send(cerrar, “L”);
+send(cerrar, “E”);
+}
+Lectores/Escritores prioridad Lectores
+(Asíncrono)
+S
+int nl = 0;
+boolean escribiendo = false;
+while (true) {
+pri select {
+when !escribiendo =>    
+receive(abrir_lectura, buzonRespuesta);
+send(buzonRespuesta, "ok");
+nl++;
+or
+when (nl==0 && !escribiendo) =>
+receive(abrir_escritura, buzonRespuesta);
+send(buzonRespuesta, "ok");
+escribiendo = true;
+or
+receive(cerrar, msg);
+if (msg == "L") nl--;
+if (msg == "E") escribiendo = false;
+}
+}
+Análisis L/E prioridad E (Asíncronos)
+• Recursos no 
+compartibles– nl, nee y escribiendo– RECURSO sólo a 
+veces
+• Condiciones de 
+sincronización
+• Necesitamos mantener el valor de 
+nl, nee y escribiendo en un 
+proceso controlador
+• El controlador recibirá peticiones 
+de lectura o escritura desde los 
+distintos procesos (dos buzones)
+• Para saber si hay peticiones de 
+escritura pendientes usamos otro 
+buzón de solicitudes de escritura.– leer si !escribiendo y 
+nee == 0– escribir si !escribiendo 
+y nl==0
+• Cada proceso deberá bloquearse 
+hasta que le concedan permiso (un 
+buzón por proceso)
+• Finalmente habrá que informar al 
+controlador de la liberación del 
+recurso (otro buzón)
+Lectores/Escritores prioridad Escritores
+(Asíncrono)
+Li
+abrir_lectura
+S
+abrir_escritura
+solicitud
+Ei
+cerrar
+Lector i
+MailBox bRes = new MailBox();
+while (true) {
+send(abrir_lectura, bRes);
+receive(bRes, ok);
+// Leer
+}
+Escritor i
+MailBox bRes = new MailBox();
+while (true) {
+send(solicitud, “E”);
+send(cerrar, “L”);
+send(abrir_escritura, bRes);
+receive(bRes, ok);
+// Escribir
+send(cerrar, “E”);
+}
+Lectores/Escritores prioridad Escritores (Asíncrono)
+S
+El && nee>0 
+asegura que ya
+se ha procesado
+antes la solicitud
+de escritura que
+atender el 
+abrir_escritura
+(los send no son 
+bloqueantes)
+Puede existir
+inanición de 
+lectores (se 
+puede usar un nle
+si se quiere ser
+más justo)
+int nl = 0; int nee = 0;
+boolean escribiendo = false;
+while (true) {
+select {
+receive(solicitud, msg);
+if (msg == "E") nee++;
+or
+when (nee == 0) && !escribiendo =>    
+receive(abrir_lectura, buzonRespuesta);
+send(buzonRespuesta, "ok");
+nl++;
+or
+when (nl==0) && !escribiendo && nee > 0 =>
+receive(abrir_escritura, buzonRespuesta);
+send(buzonRespuesta, "ok");
+escribiendo = true;
+nee--;
+or
+receive(cerrar, msg);
+if (msg == "L") nl--;
+if (msg == "E") escribiendo = false;
+}
+}
+Análisis L/E prioridad L (Síncronos)
+• Recursos no 
+compartibles– nl y escribiendo– RECURSO sólo a 
+veces
+• Condiciones de 
+sincronización– leer si !escribiendo– escribir si !escribiendo 
+y nl==0
+• Necesitamos mantener el valor de 
+nl y escribiendo en un proceso 
+controlador
+• El controlador recibirá peticiones 
+de lectura o escritura desde los 
+distintos procesos (un canal por 
+proceso)
+• Cada proceso deberá bloquearse 
+hasta que le concedan permiso (el 
+send es bloqueante)
+• Finalmente habrá que informar al 
+controlador de la liberación del 
+recurso (un canal por proceso)
+Lectores/Escritores prioridad Lectores
+(Síncrono)
+L1
+…
+S
+LN
+Lector i
+EM
+…
+E1
+while (true) {
+send(abrir_lectura[i], “”);
+// Leer
+}
+while (true) {
+Escritor i
+send(abrir_escritura[i], “”);
+// Escribir
+send(cerrar_lectura[i], “”);
+send(cerrar_escritura[i], “”);
+}
+Lectores/Escritores prioridad Lectores (Síncrono)
+S
+int nl = 0;
+boolean escribiendo = false;
+while (true) {
+select {
+when !escribiendo =>    
+receive (abrir_lectura[1], msg);
+nl++;
+or
+or
+}
+receive(cerrar_lectura[1], msg);
+nl--;
+when (nl==0) && !escribiendo =>
+receive(abrir_escritura[1], msg);
+escribiendo = true;
+or
+receive(cerrar_escritura[1], msg);
+escribiendo = false;
+or
+...
+}
+Análisis L/E prioridad E (Síncronos)
+• Recursos no 
+compartibles– nl, nee y escribiendo– RECURSO sólo a 
+veces
+• Condiciones de 
+sincronización
+• Necesitamos mantener el valor de 
+nl, nee y escribiendo en un 
+proceso controlador
+• El controlador recibirá peticiones 
+de lectura o escritura desde los 
+distintos procesos (un canal por 
+proceso)
+• Necesitamos otro canal por 
+escritor para indicar solicitud y 
+poder llevar así la cuenta de nee – leer si !escribiendo y 
+nee==0– escribir si !escribiendo 
+y nl==0
+• Cada proceso deberá bloquearse 
+hasta que le concedan permiso (el 
+send es bloqueante)
+• Finalmente habrá que informar al 
+controlador de la liberación del 
+recurso (un canal por proceso)
+Lectores/Escritores prioridad Escritores
+(Síncrono)
+S
+L1
+Lector i
+LN
+EM
+E1
+while (true) {
+send(abrir_lectura[i], “”);
+// Leer
+}
+while (true) {
+Escritor i
+send(solicitud[i], “”);
+send(abrir_escritura[i], “”);
+send(cerrar_lectura[i], “”);
+// Escribir
+send(cerrar_escritura[i], “”);
+}
+S
+Lectores/Escritores prioridad
+Escritores (Síncrono)
+int nl = 0; int nee = 0; boolean escribiendo = false;
+while (true) {
+select {
+when (nee == 0) && !escribiendo =>    
+receive(abrir_lectura[1], msg);
+nl++;
+or
+receive(cerrar_lectura[1], msg);
+nl--;
+or
+or
+or
+or
+}
+receive(solicitud[1], msg);
+nee++;    
+when (nl==0) && !escribiendo =>
+receive(abrir_escritura[1], msg);
+escribiendo = true;
+nee--;
+receive(cerrar_escritura[1], msg);
+escribiendo = false;
+...
+}
+Filósofos
+• Cinco filósofos se dedican a pensar y comer de forma 
+alterna. Para comer usan una mesa con cinco sillas, 
+cinco palillos y cinco platos.
+• Cuando un filósofo decide comer intenta coger sus dos 
+palillos y sólo comerá cuando tenga los dos.
+1
+2
+2
+1
+3 4
+0
+0
+3
+4
+• Procesos que necesitan utilizar 
+varios recursos no compartibles 
+simultáneamente. El número de 
+recursos no es suficiente para 
+abastecer a todos los procesos al 
+mismo tiempo.
+Análisis Filósofos (Asíncrono)
+• Recursos no 
+compartibles– palillos o asientos
+• Condiciones de 
+sincronización– Filósofo i sólo come si 
+sus dos palillos están 
+libres
+• estado de los palillos o de 
+los filósofos como variables 
+del un proceso controlador
+• Habrá dos buzones por 
+filósofo, uno para petición y 
+otro para informar de 
+liberación.
+• Las peticiones sólo se 
+atienden si se cumplen todas 
+las condiciones necesarias
+Filósofos (Asíncrono)
+V1.0
+bRes
+Fi
+liberación[i]
+Filósofo i
+S
+MailBox bRes = new MailBox();
+while (true) {
+send(permiso[i], bRes);
+receive(bRes, ok);
+// Comer
+send(liberación[i], null);
+// Pensar
+}
+V2.0
+permiso[i]
+permiso[i]
+bRes
+Fi
+S
+liberación
+Filósofo i
+MailBox bRes = new MailBox();
+while (true) {
+send(permiso[i], bRes);
+receive(bRes, ok);
+// Comer
+}
+// Pensar
+send(liberación, i);
+Filósofos (Asíncrono)
+boolean libre[] = {true,true,true,true,true};
+while (true) {
+select {
+when libre[4] && libre[1] =>    
+receive(permiso[0], buzonRespuesta);
+libre[0] = false;
+send(buzonRespuesta, “ok”);
+or
+...
+or
+when libre[3] && libre[0] =>    
+receive(permiso[4], buzonRespuesta);
+libre[4] = false;
+send(buzonRespuesta, “ok”);
+or
+receive(liberación, idFilosofo);
+libre[idFilosofo] = true;
+}
+}
+S
+Librese refiere
+aquíal asiento
+Análisis Filósofos (Síncrono)
+• Recursos no 
+compartibles– palillos o asientos
+• Condiciones de 
+sincronización– Filósofo i sólo come si 
+sus dos palillos están 
+libres
+• estado de los palillos o de 
+los filósofos como variables 
+del un proceso controlador
+• Habrá dos canales por 
+filósofo, uno para petición y 
+otro para informar de 
+liberación.
+• Las peticiones sólo se 
+atienden si se cumplen todas 
+las condiciones necesarias
+Filósofos (Síncrono)
+permiso[i]
+Fi
+liberación[i]
+Filósofo i
+S
+while (true) {
+send(permiso[i], null);
+// Comer
+send(liberación[i], i);
+// Pensar
+}
+Filósofos (Síncrono)
+boolean libre[] = {true,true,true,true,true};
+while (true) {
+select {
+when libre[4] && libre[1] =>    
+receive(permiso[0], msg);
+libre[0] = false;
+or
+receive(liberación[0], msg);
+libre[0] = true;
+or
+...
+or
+when libre[3] && libre[0] =>    
+receive(permiso[4], msg);
+libre[4] = false;
+or
+receive(liberación[4], msg);
+libre[4] = true;
+}
+}
+S

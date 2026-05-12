@@ -1,0 +1,196 @@
+PROGRAMACIÓN CONCURRENTE Y DISTRIBUIDA
+BOLETÍN DE PRÁCTICAS
+CONVOCATORIAS DE JUNIO
+CURSO 2025-2026
+Contenido
+ENTREGABLES 3
+FORMATO DE LOS DOCUMENTOS 3
+EVALUACIÓN 4
+EJERCICIO 1: REENTRANTLOCK 5
+EJERCICIO 2: SEMÁFOROS 6
+EJERCICIO 3: MONITORES 7
+EJERCICIO 4: PASO DE MENSAJES ASÍNCRONO 8
+
+Entregables
+La entrega constará de un único proyecto conteniendo 4 paquetes (uno para cada
+ejercicio) que se comprimirá en un fichero .zip y una memoria de prácticas en formato PDF.
+Los ejercicios se implementarán en Java 8 o una versión superior usando la codificación de
+caracteres UTF-8 (Project-Resource-Textfileencoding-Other-UTF-8). Tanto el código fuente
+como la memoria se entregarán a través de una tarea que será creada en el AULA
+VIRTUAL. No se admitirán entregas realizadas por otros medios.
+En la memoria escrita se deben incluir necesariamente para cada ejercicio los
+siguientes apartados:
+• Recursos no compartibles. Los que se hayan identificado en el problema.
+• Condiciones de sincronización. Las detectadas en el problema.
+• Pseudocódigo comentado. El de los diferentes hilos y monitores que
+intervengan en la solución.
+• Cuestiones planteadas en los ejercicios.
+• Código Java de los ejercicios comentado.
+Formato de los documentos
+La memoria de prácticas deberá estar escrita correctamente en sus aspectos ortográfico
+y gramatical, evitando el uso de vulgarismos y lenguaje SMS. Las páginas deberán estar
+numeradas y se debe incluir un índice. El tipo de letra utilizado para el texto normal será Times
+New Román (o semejante) en 12 puntos y en color negro. El interlineado será sencillo. Los
+listados de código deberán estar formateados cuidando varios aspectos:
+• Indentación.
+• Tamaño de la letra adecuado para que no se corten los renglones, o cuando esto
+ocurra el código siga siendo legible y ordenado.
+• Tipo de letra de paso fijo (Courier o semejante) en color negro.
+Además, el código fuente entregado debe estar debidamente comentado tanto en los
+bloques de código más relevantes en relación con la programación concurrente y distribuida
+como mediante el uso de Javadoc para las clases y métodos desarrollados.
+En la portada de la memoria de prácticas deberá aparecer arriba a la derecha la siguiente
+información: Apellidos, Nombre, Asignatura, Grupo y Subgrupo de Prácticas, Convocatoria,
+Año académico y Profesor.
+Evaluación
+La evaluación constará de dos partes principales: la corrección de las prácticas
+entregadas y la defensa de las mismas en una entrevista personal. Las prácticas se realizarán
+en parejas de 2.
+
+Como criterios de evaluación se tendrán en cuenta los siguientes:
+• Corrección de las soluciones aportadas.
+• Grado de concurrencia
+• Entrevista de prácticas
+• Claridad en la explicación (memoria de prácticas)
+• Originalidad.
+La copia de prácticas será motivo de suspenso para todos los participantes implicados.
+La no asistencia (injustificada) a la entrevista de prácticas será motivo de suspenso de las
+mismas.
+Este boletín se compone de cuatro ejercicios que serán valorados por el profesor con
+una puntuación de 0 a 10 cada uno. Para superar la parte práctica será necesario sacar una
+nota igual o superior a 4 en cada uno de ellos. Cuando todos los ejercicios estén superados la
+ponderación aplicada será la siguiente: 0.25*E1 + 0.25*E2 + 0.25*E3 + 0.25*E4. La fecha
+límite para la entrega del boletín de prácticas será el 4 de mayo a las 23:55 horas.
+Ejercicio 1: ReentrantLock
+Supongamos dos hilos con la siguiente funcionalidad en un centro de alto rendimiento:
+• Un primer hilo genera una matriz A (3x3) con enteros que representa métricas de
+entrenamiento (por ejemplo: fuerza, velocidad y resistencia en 3 días), calcula el
+“impacto acumulado” A² = A·A e imprime:
+A x A
+a1 a2 a3
+a4 a5 a6
+a7 a8 a9
+x
+a1 a2 a3
+a4 a5 a6
+a7 a8 a9
+A2
+r1 r2 r3
+r4 r5 r6
+r7 r8 r9
+• El otro hilo hace lo mismo, pero calcula A + A (doble carga) e imprime:
+A + A
+...
+2A
+...
+Cada hilo repite su actividad 10 veces. Desarrollar un programa concurrente en Java. La
+sincronización necesaria se resolverá usando cerrojos ReentrantLock.
+a) Si no usas sincronización, ¿cómo podría ser la salida por pantalla?
+Ejercicio 2: Semáforos
+En un centro de evaluación deportiva, hay 3 pantallas (paneles) para mostrar resultados de
+pruebas físicas. En el sistema se dispone de 3 instancias de la clase Panel proporcionada en
+los recursos del aula virtual. Hay 10 hilos, cada uno representa a un equipo de 4 deportistas.
+Cada hilo repite 3 veces la siguiente secuencia:
+1. Cada hilo genera aleatoriamente una matriz 5x5 de enteros para cada uno de los 4
+deportistas del equipo, donde las filas representan 5 ejercicios del test físico
+(sprint, salto, lanzamiento, resistencia, y agilidad) y las columnas representan 5
+intentos para conseguir la mejor marca en cada ejercicio.
+2. Para cada deportista, se calcula su mejor marca por ejercicio, seleccionando
+el máximo (o mínimo, en caso de ser tiempo) de los 5 intentos de cada fila. El
+resultado para cada deportista es un vector de 5 elementos (uno por ejercicio).
+3. A partir de los resultados anteriores, se construye una matriz resumen de
+4x5 llamada R, que representa el resumen del equipo:
+• Columna 1: mejor marca de cada deportista para el ejercicio 1
+• Columna 2: mejor marca de cada deportista para el ejercicio 2
+• Columna 3: mejor marca de cada deportista para el ejercicio 3
+• Columna 4: mejor marca de cada deportista para el ejercicio 4
+• Columna 5: mejor marca de cada deportista para el ejercicio 5
+4. Muestra en un panel que esté disponible la siguiente salida:
+Usando panel P el hilo (equipo) id
+Matriz R (resumen del equipo X: mejores marcas) = ...
+Terminando de usar panel P el hilo (equipo) id
+Los pasos 1, 2, 3 y 4 se repiten 3 veces por equipo.
+Los 10 hilos (equipos) comparten los 3 paneles del sistema y, usando semáforos, se debe
+añadir la sincronización necesaria para que:
+• nunca dos hilos escriban simultáneamente en el mismo panel,
+• el uso de los paneles sea eficiente (máximo paralelismo posible).
+La sincronización hay que resolverla con semáforos.
+Según las condiciones del problema:
+a) (0.5 puntos sobre 10) Si consideramos un panel solamente ¿cómo es el acceso al mismo?
+Si consideramos los tres paneles ¿cómo es el acceso? Explica ambas situaciones.
+b) (0.5 puntos sobre 10) ¿Qué tipo de semáforos has usado para resolver el problema
+(binarios, generales)?
+Ejercicio 3: Monitores
+En este ejercicio se quiere simular mediante un programa concurrente la actividad en
+un gimnasio. El flujo para entrenar es el siguiente:
+1. Acceso al gimnasio mediante tornos): Un cliente llega al gimnasio y debe pasar
+por uno de los 3 tornos de acceso para validar su entrada. Cada torno tiene su cola
+individual. El tiempo que tarda el cliente en completar el acceso (validación + entrada)
+es X milisegundos (valor aleatorio entre 1 y 5). Nota: el cliente debe situarse en
+el primer torno que encuentre libre; si los 3 están ocupados, esperará en la cola del
+torno que tenga menor tiempo de espera.
+2. Elección de zona de entrenamiento: Tras pasar la zona de tornos, el cliente elige a
+qué zona de entrenamiento dirigirse en función del tiempo estimado de espera. El
+gimnasio tiene 4 zonas, y cada zona dispone de 5 máquinas: Zona 1 – Cardio, Zona
+2 – Fuerza, Zona 3 – Funcional, Zona 4 - Estiramientos . Un cliente puede entrar a
+una zona si al menos una de sus máquinas está libre. Si hay varias zonas con máquinas
+libres elegirá una de forma aleatoria. Si las 5 máquinas de una zona están ocupadas, el
+cliente debe esperar en la cola de acceso de esa zona (una cola por zona).
+3. Dentro de la zona de Cardio existe una bicicleta premium que tiene una cola
+exclusiva propia, independiente de la cola general de la zona. Un cliente puede entrar
+en Cardio si hay alguna de las 5 máquinas libres (según el paso 2). Si el cliente desea
+usar la bicicleta premium (decisión con probabilidad del 30%) y está ocupada, deberá
+esperar en la cola exclusiva de la bicicleta premium, incluso aunque ya esté dentro.
+4. El entrenamiento tarda Y milisegundos (valor aleatorio por cliente), representado
+mediante el método Sleep() de Java.
+Se realizará una simulación con 50 hilos cliente, con valores X e Y inicializados
+aleatoriamente. Desarrollar un programa concurrente en Java para resolver el problema anterior
+usando monitores como mecanismo para la sincronización.
+Formato de salida obligatorio: Justo antes de decidir a qué zona dirigirse, cada cliente debe
+imprimir en pantalla:
+--------------------------------------------------------------
+Cliente id ha pasado por el torno: -----
+Tiempo en el torno (acceso): X
+Zona elegida: -----
+Tiempo de entrenamiento: Y
+Estimación de espera (sin incluirse a sí mismo):
+ Zona1(Cardio)=----, Zona2(Fuerza)=----, Zona3(Funcional)=----,
+Zona4(Estiramientos)=----
+Espera bicicleta premium (si aplica)=----
+--------------------------------------------------------------
+Según las condiciones de sincronización del problema,
+a) (0.5 puntos) Indica si la acción de entrenar es concurrente o en exclusión mutua y
+justifica.
+b) (0.75 puntos) ¿Qué tipo de monitor Java has usado? Justifica.
+c) (0.5 puntos) En el monitor, ¿has usado notify/signal o notifyAll/signalAll? Justifica.
+d) (0.75 puntos) ¿Cómo se ha resuelto la exclusión mutua de la pantalla en este problema
+Ejercicio 4: Paso de Mensajes Asíncrono
+Consideremos un conjunto de 50 aficionados que llegan a un estadio de fútbol para entrar a un
+partido y deben pasar por el control de acceso tras validar su entrada. Para acceder hay dos
+tornos con sus respectivas colas: la cola R y la cola L, siendo la cola R más rápida que la L (por
+ejemplo, porque el torno R tiene lector más eficiente o un agente adicional). Cada aficionado
+tiene que usar una cola para validar su entrada durante un tiempo estimado (valor aleatorio
+entre 1 y 10). El controlador de accesos, cuando llega un nuevo aficionado a validar la entrada,
+estima su tiempo de validación y a aquellos aficionados cuyo tiempo estimado sea menor o
+igual a 5, se les asignará el torno más rápido, es decir, la cola R, a los demás aficionados se les
+asignará el torno L. Durante el partido, cada aficionado puede salir de su grada para ir a los
+baños o a la zona de compra de comida y bebida. Para volver a su zona, debe pasar de nuevo
+por los tornos, repitiendo el proceso de validación. Este ciclo de “salir y volver a entrar” lo
+realizará 5 veces a lo largo del partido. Es decir, cada hilo repite 5 veces la siguiente secuencia
+de acciones:
+1. Realiza una acción previa (usando Sleep ()), por ejemplo caminar hacia los baños.
+2. Solicita ponerse en una cola (R o L según el controlador de accesos le indique).
+3. Realiza la validación en el torno asignado.
+4. Libera la cola (deja libre el torno),
+5. Imprime en pantalla la información que se indica a continuación:
+“Aficionado id ha usado la cola X
+Tiempo de validación = T
+Thread.sleep(T)
+Aficionado id liberando la cola X”
+donde X es la cola asignada y T el tiempo de validación.
+Desarrollar un programa concurrente en Java para resolver el problema anterior usando como
+mecanismo para la sincronización el paso de mensajes asíncrono. Resolver las siguientes
+preguntas.
+a) (0.5 puntos sobre 10) ¿Se pueden usar simultáneamente los dos tornos? Justifica la
+respuesta.
+b) (0.5 puntos sobre 10) ¿Cómo has resuelto la exclusión mutua de la pantalla?
